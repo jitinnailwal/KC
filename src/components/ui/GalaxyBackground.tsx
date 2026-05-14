@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 
 interface Star {
   x: number;
@@ -58,16 +58,8 @@ export default function GalaxyBackground() {
   const mouse = useRef({ x: -9999, y: -9999 });
   const time = useRef(0);
   const lastTime = useRef(0);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
-    const mobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
-    setIsMobileDevice(mobile);
-    if (mobile) return; // Skip entire canvas setup on mobile
-  }, []);
-
-  useEffect(() => {
-    if (isMobileDevice) return; // Skip canvas animation on mobile
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { willReadFrequently: false });
@@ -226,7 +218,18 @@ export default function GalaxyBackground() {
       }
     };
 
+    // On mobile, throttle to ~30fps to save battery and avoid jank
+    let lastFrameTime = 0;
+    const frameInterval = isMobile ? 33 : 0; // ~30fps on mobile, uncapped on desktop
+
     const animate = (timestamp: number) => {
+      // Frame throttling on mobile
+      if (isMobile && timestamp - lastFrameTime < frameInterval) {
+        animId.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTime = timestamp;
+
       // Time-based animation
       if (lastTime.current === 0) lastTime.current = timestamp;
       const dt = Math.min(timestamp - lastTime.current, 50); // cap delta to avoid jumps
@@ -238,13 +241,19 @@ export default function GalaxyBackground() {
       ctx.fillStyle = '#050510';
       ctx.fillRect(0, 0, width, height);
 
-      // Deep space gradient
-      const bgGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(width, height) * 0.7);
-      bgGrad.addColorStop(0, 'rgba(15, 10, 40, 0.6)');
-      bgGrad.addColorStop(0.4, 'rgba(8, 5, 25, 0.4)');
-      bgGrad.addColorStop(1, 'rgba(2, 2, 10, 0)');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, width, height);
+      // Deep space gradient (skip on mobile to reduce GPU draw calls)
+      if (!isMobile) {
+        const bgGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.max(width, height) * 0.7);
+        bgGrad.addColorStop(0, 'rgba(15, 10, 40, 0.6)');
+        bgGrad.addColorStop(0.4, 'rgba(8, 5, 25, 0.4)');
+        bgGrad.addColorStop(1, 'rgba(2, 2, 10, 0)');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+      } else {
+        // Lightweight single-color overlay for depth on mobile
+        ctx.fillStyle = 'rgba(10, 7, 30, 0.4)';
+        ctx.fillRect(0, 0, width, height);
+      }
 
       // Galaxy spiral dust
       drawGalaxySpiralDust(t);
@@ -341,14 +350,23 @@ export default function GalaxyBackground() {
         ctx.fill();
       }
 
-      // Central galaxy core glow
-      const coreGlow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 180);
-      const corePulse = 0.02 + 0.008 * Math.sin(t * 0.0008);
-      coreGlow.addColorStop(0, `rgba(100, 140, 255, ${corePulse})`);
-      coreGlow.addColorStop(0.5, `rgba(60, 80, 200, ${corePulse * 0.4})`);
-      coreGlow.addColorStop(1, 'rgba(20, 20, 80, 0)');
-      ctx.fillStyle = coreGlow;
-      ctx.fillRect(0, 0, width, height);
+      // Central galaxy core glow (simplified on mobile)
+      if (!isMobile) {
+        const coreGlow = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 180);
+        const corePulse = 0.02 + 0.008 * Math.sin(t * 0.0008);
+        coreGlow.addColorStop(0, `rgba(100, 140, 255, ${corePulse})`);
+        coreGlow.addColorStop(0.5, `rgba(60, 80, 200, ${corePulse * 0.4})`);
+        coreGlow.addColorStop(1, 'rgba(20, 20, 80, 0)');
+        ctx.fillStyle = coreGlow;
+        ctx.fillRect(0, 0, width, height);
+      } else {
+        // Simple glow dot on mobile
+        const corePulse = 0.025 + 0.01 * Math.sin(t * 0.0008);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 120, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(80, 120, 255, ${corePulse})`;
+        ctx.fill();
+      }
 
       // --- Orbiting Particles Layer ---
       // Energy pulse: trigger a random particle every 3-5s
@@ -502,8 +520,8 @@ export default function GalaxyBackground() {
         const glowExtra = p.pulseGlow;
         const totalSize = p.size + glowExtra * 3;
 
-        // Glow halo for larger particles or pulsing ones
-        if (totalSize > 1.8 || glowExtra > 0.1) {
+        // Glow halo for larger particles or pulsing ones (skip radial gradient on mobile)
+        if (!isMobile && (totalSize > 1.8 || glowExtra > 0.1)) {
           const haloRadius = totalSize * 4 + glowExtra * 8;
           const haloAlpha = 0.15 + glowExtra * 0.4;
           const glowGrad = ctx.createRadialGradient(px, py, 0, px, py, haloRadius);
@@ -523,12 +541,14 @@ export default function GalaxyBackground() {
         ctx.fill();
       }
 
-      // Subtle vignette (drawn last)
-      const vignette = ctx.createRadialGradient(centerX, centerY, height * 0.3, centerX, centerY, Math.max(width, height) * 0.8);
-      vignette.addColorStop(0, 'rgba(0,0,0,0)');
-      vignette.addColorStop(1, 'rgba(0,0,0,0.5)');
-      ctx.fillStyle = vignette;
-      ctx.fillRect(0, 0, width, height);
+      // Subtle vignette (drawn last — skip on mobile, use CSS overlay instead)
+      if (!isMobile) {
+        const vignette = ctx.createRadialGradient(centerX, centerY, height * 0.3, centerX, centerY, Math.max(width, height) * 0.8);
+        vignette.addColorStop(0, 'rgba(0,0,0,0)');
+        vignette.addColorStop(1, 'rgba(0,0,0,0.5)');
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, width, height);
+      }
 
       animId.current = requestAnimationFrame(animate);
     };
@@ -541,26 +561,23 @@ export default function GalaxyBackground() {
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [isMobileDevice]);
-
-  // On mobile, render a lightweight static gradient instead of canvas
-  if (isMobileDevice) {
-    return (
-      <div
-        className="absolute inset-0 w-full h-full"
-        style={{
-          zIndex: 0,
-          background: 'radial-gradient(ellipse at center, rgba(15, 10, 40, 0.8) 0%, #050510 70%)',
-        }}
-      />
-    );
-  }
+  }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full"
-      style={{ zIndex: 0 }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ zIndex: 0 }}
+      />
+      {/* CSS vignette overlay for mobile (avoids per-frame radial gradient) */}
+      <div
+        className="absolute inset-0 w-full h-full pointer-events-none md:hidden"
+        style={{
+          zIndex: 0,
+          background: 'radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%)',
+        }}
+      />
+    </>
   );
 }
