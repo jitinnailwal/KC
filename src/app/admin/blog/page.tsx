@@ -391,8 +391,8 @@ export default function AdminBlog() {
                 key={blog.id}
                 className="p-5 rounded-xl border border-dark-700/30 bg-dark-800/30 hover:border-dark-700/50 transition-all group"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4 flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
                     {blog.coverImage && (
                       <div className="relative w-16 h-10 rounded-md overflow-hidden border border-dark-700/40 shrink-0">
                         <Image
@@ -404,7 +404,7 @@ export default function AdminBlog() {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${
                             blog.published
@@ -421,16 +421,16 @@ export default function AdminBlog() {
                           {blog.date}
                         </span>
                       </div>
-                      <h3 className="font-heading font-semibold text-base mb-1 truncate">
+                      <h3 className="font-heading font-semibold text-sm sm:text-base mb-1 truncate">
                         {blog.title}
                       </h3>
-                      <p className="text-sm text-light-300/40 truncate">
+                      <p className="text-xs sm:text-sm text-light-300/40 truncate">
                         {blog.excerpt}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
                     <button
                       onClick={() => togglePublish(blog)}
                       className="px-3 py-1.5 rounded-lg text-xs border border-dark-700/40 text-light-300/50 hover:text-light hover:border-dark-700 transition-colors"
