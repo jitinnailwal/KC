@@ -24,6 +24,11 @@ export async function GET() {
   try {
     await dbConnect();
     const blogs = await Blog.find().sort({ date: -1 });
+    if (blogs.length === 0) {
+      return NextResponse.json(getFallbackBlogs(), {
+        headers: { 'X-Data-Source': 'fallback-json' },
+      });
+    }
     return NextResponse.json(blogs);
   } catch (error) {
     if (isMongoConnectionError(error)) {
