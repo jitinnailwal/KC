@@ -1,0 +1,416 @@
+/* Fonts loaded via layout.tsx <link> with preconnect for faster loading */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --dark: #0A0A0A;
+  --dark-800: #1E1E1E;
+  --dark-700: #3A3A3A;
+  --light: #F5F5F5;
+  --accent-blue: #4F8CFF;
+  --accent-gold: #C8A96A;
+  --cursor-size: 20px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
+  background: var(--dark);
+}
+
+body {
+  background: var(--dark);
+  color: var(--light);
+  overflow-x: hidden;
+  cursor: auto;
+}
+
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+  }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dark-700);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-blue);
+}
+
+::selection {
+  background: rgba(79, 140, 255, 0.3);
+  color: var(--light);
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(30, 30, 30, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-strong {
+    background: rgba(30, 30, 30, 0.7);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-white {
+    background: linear-gradient(135deg, #FFFFFF 0%, #999999 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 30px rgba(79, 140, 255, 0.15),
+                0 0 60px rgba(79, 140, 255, 0.05);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 30px rgba(200, 169, 106, 0.15),
+                0 0 60px rgba(200, 169, 106, 0.05);
+  }
+
+  .border-glow {
+    border: 1px solid rgba(79, 140, 255, 0.2);
+  }
+}
+
+.custom-cursor {
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+
+.custom-cursor.hovering {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-blue);
+}
+
+.custom-cursor-dot {
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(79, 140, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79, 140, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  body {
+    cursor: auto;
+  }
+  .custom-cursor,
+  .custom-cursor-dot {
+    display: none !important;
+  }
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 767px) {
+  body::before {
+    display: none;
+  }
+
+  .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(30, 30, 30, 0.75);
+  }
+
+  .glass-strong {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(30, 30, 30, 0.9);
+  }
+}
+
+/* Touch devices — disable backdrop-filter entirely for smooth 60fps scroll */
+@media (hover: none) and (pointer: coarse) {
+  .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(30, 30, 30, 0.75);
+  }
+
+  .glass-strong {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(30, 30, 30, 0.9);
+  }
+}
+
+/* Hardware acceleration for animated elements */
+.testimonial-card,
+.project-card,
+.service-card,
+.stat-card,
+.process-step {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Promote scrollable containers to GPU layers on mobile */
+@media (max-width: 767px) {
+  main {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  section {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+}
+
+/* === Hero Heading Interactive Effects === */
+
+/* Animated gradient overlay that flows across the "Digital Future." line */
+.hero-gradient-line {
+  position: relative;
+  display: inline;
+}
+
+.hero-gradient-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 300%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(79, 140, 255, 0.12) 30%,
+    rgba(200, 169, 106, 0.1) 60%,
+    transparent 100%
+  );
+  animation: gradient-flow 8s ease infinite;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  border-radius: 4px;
+  will-change: transform;
+}
+
+@keyframes gradient-flow {
+  0% { transform: translateX(-33%); }
+  100% { transform: translateX(33%); }
+}
+
+/* Heading wrap base */
+.hero-heading-wrap {
+  position: relative;
+  overflow: visible;
+}
+
+/* Holographic shimmer on individual chars */
+.hero-char-shimmer {
+  animation: char-shimmer 0.6s ease-out !important;
+}
+
+@keyframes char-shimmer {
+  0% { filter: brightness(1) hue-rotate(0deg); }
+  40% { filter: brightness(1.3) hue-rotate(15deg); }
+  100% { filter: brightness(1) hue-rotate(0deg); }
+}
+
+/* Pulsing glow behind heading — uses a pseudo-element so it works with transparent text */
+.hero-heading-glow {
+  position: relative;
+}
+
+.hero-heading-glow::after {
+  content: '';
+  position: absolute;
+  inset: -60px -120px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(79, 140, 255, 0.07) 0%,
+    rgba(200, 169, 106, 0.05) 35%,
+    rgba(79, 140, 255, 0.03) 55%,
+    transparent 75%
+  );
+  animation: heading-glow-pulse 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 50%;
+}
+
+@keyframes heading-glow-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Energy pulse wave from heading center */
+.hero-heading-wrap::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(79, 140, 255, 0.05) 0%, transparent 70%);
+  animation: energy-pulse 6s ease-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes energy-pulse {
+  0%, 80% { width: 0; height: 0; opacity: 0.05; }
+  90% { width: 700px; height: 300px; opacity: 0.04; }
+  100% { width: 900px; height: 400px; opacity: 0; }
+}
+
+/* 3D perspective container */
+.hero-heading-perspective {
+  perspective: 800px;
+}
+
+/* === Cinematic Subtext Effects === */
+
+/* Ambient glow breathing behind subtext */
+.hero-subtext-wrap {
+  position: relative;
+}
+
+.hero-subtext-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -30px -60px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(79, 140, 255, 0.04) 0%,
+    rgba(200, 169, 106, 0.02) 50%,
+    transparent 75%
+  );
+  animation: subtext-glow-breathe 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 50%;
+}
+
+@keyframes subtext-glow-breathe {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
+/* Subtle light sweep on subtext */
+.hero-subtext-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-subtext-sweep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.06) 60%,
+    transparent 100%
+  );
+  animation: subtext-sweep 10s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes subtext-sweep {
+  0%, 70% { left: -100%; opacity: 0; }
+  80% { opacity: 1; }
+  100% { left: 250%; opacity: 0; }
+}
+
+/* Touch devices — simplified effects */
+@media (hover: none) and (pointer: coarse) {
+  .hero-heading-wrap::before {
+    display: none;
+  }
+  .hero-subtext-sweep::before {
+    display: none;
+  }
+}
+
+/* Optimize rendering of off-screen sections */
+@media (max-width: 767px) {
+  .content-defer {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }
+}
+
+/* CSS ticker animation for mobile (avoids GSAP scrollWidth forced reflow) */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--ticker-width)); }
+}
+
+.ticker-css-animate {
+  animation: ticker-scroll 30s linear infinite;
+}

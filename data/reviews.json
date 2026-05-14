@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1",
+    "quote": "Kreative Catalyst transformed our brand from forgettable to iconic. Their attention to detail and strategic thinking is unmatched.",
+    "name": "Sarah Chen",
+    "role": "CEO, Lumière Finance",
+    "rating": 5,
+    "published": true,
+    "date": "2026-04-15",
+    "image": ""
+  },
+  {
+    "id": "2",
+    "quote": "Working with KC was like having a creative partner who truly understands the intersection of design and business impact.",
+    "name": "Marcus Rivera",
+    "role": "Founder, Noir Fashion",
+    "rating": 5,
+    "published": true,
+    "date": "2026-04-10",
+    "image": ""
+  },
+  {
+    "id": "3",
+    "quote": "They don't just build websites — they craft experiences. Our conversion rate tripled after the redesign.",
+    "name": "Emily Zhang",
+    "role": "CMO, Zenith Health",
+    "rating": 5,
+    "published": true,
+    "date": "2026-03-28",
+    "image": ""
+  },
+  {
+    "id": "4",
+    "quote": "The level of creativity and technical excellence is rare. Kreative Catalyst delivered beyond our wildest expectations.",
+    "name": "David Park",
+    "role": "CTO, NovaTech",
+    "rating": 5,
+    "published": true,
+    "date": "2026-03-15",
+    "image": ""
+  },
+  {
+    "id": "5",
+    "quote": "From brand strategy to final launch, every step was handled with precision. A truly world-class creative studio.",
+    "name": "Aisha Patel",
+    "role": "VP Marketing, Solaris",
+    "rating": 5,
+    "published": true,
+    "date": "2026-02-20",
+    "image": ""
+  },
+  {
+    "id": "6",
+    "quote": "Our entire digital presence was elevated. The ROI on their work paid for itself within the first quarter.",
+    "name": "James Walker",
+    "role": "Director, Apex Ventures",
+    "rating": 5,
+    "published": true,
+    "date": "2026-02-05",
+    "image": ""
+  }
+]
