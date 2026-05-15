@@ -9,6 +9,7 @@ import Hero from '@/components/sections/Hero';
 const About = dynamic(() => import('@/components/sections/About'));
 const Services = dynamic(() => import('@/components/sections/Services'));
 const Testimonials = dynamic(() => import('@/components/sections/Testimonials'));
+const FeaturedWork = dynamic(() => import('@/components/sections/FeaturedWork'));
 const Blog = dynamic(() => import('@/components/sections/Blog'));
 const Contact = dynamic(() => import('@/components/sections/Contact'));
 const Footer = dynamic(() => import('@/components/layout/Footer'));
@@ -64,6 +65,7 @@ export default function Home() {
         <About />
         <Services />
         <Testimonials />
+        <FeaturedWork />
         <Blog />
         <Contact />
       </main>
