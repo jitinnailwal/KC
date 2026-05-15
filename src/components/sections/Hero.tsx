@@ -2,8 +2,9 @@
 
 import { useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { gsap } from 'gsap';
 import MagneticButton from '@/components/ui/MagneticButton';
+
+type GSAPType = typeof import('gsap')['gsap'];
 
 const GalaxyBackground = lazy(() => import('@/components/ui/GalaxyBackground'));
 
@@ -27,6 +28,7 @@ function CinematicText() {
     const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
     let cancelled = false;
     let currentRafId = 0;
+    let gsapInstance: GSAPType;
     const handleMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
     };
@@ -35,6 +37,10 @@ function CinematicText() {
     }
 
     const runCycle = async () => {
+      const { gsap } = await import('gsap');
+      gsapInstance = gsap;
+      if (cancelled) return;
+
       let phraseIdx = 0;
 
       while (!cancelled) {
@@ -191,7 +197,9 @@ function CinematicText() {
       idleReady.current = false;
       cancelAnimationFrame(currentRafId);
       window.removeEventListener('mousemove', handleMouseMove);
-      gsap.killTweensOf(container.querySelectorAll('.hero-subtext-word'));
+      if (gsapInstance) {
+        gsapInstance.killTweensOf(container.querySelectorAll('.hero-subtext-word'));
+      }
     };
   }, []);
 
@@ -256,232 +264,246 @@ export default function Hero() {
     isMobileRef.current = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
     animReady.current = false;
 
-    const ctx = gsap.context(() => {
-      const chars = containerRef.current?.querySelectorAll('.hero-char');
-      if (!chars || chars.length === 0) return;
+    let ctx: ReturnType<GSAPType['context']> | null = null;
+    let cancelled = false;
 
-      const charArray = Array.from(chars) as HTMLElement[];
+    const initAnimation = async () => {
+      const { gsap } = await import('gsap');
+      if (cancelled) return;
 
-      // Minimal delay to allow first paint, then animate
-      const tl = gsap.timeline({ delay: isMobileRef.current ? 0.3 : 0.15 });
+      // Allow one frame of visible content for LCP measurement
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      if (cancelled) return;
 
-      if (isMobileRef.current) {
-        // Mobile: simple fade-in (no scatter, no blur filters)
-        charArray.forEach((el) => {
-          gsap.set(el, { opacity: 0, y: 20 });
-        });
+      ctx = gsap.context(() => {
+        const chars = containerRef.current?.querySelectorAll('.hero-char');
+        if (!chars || chars.length === 0) return;
 
-        tl.to(charArray, {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: { each: 0.015, from: 'start' },
-          ease: 'power3.out',
-        });
-      } else {
-        // Desktop: full scatter + settle + bounce
-        charArray.forEach((el) => {
-          const randX = (Math.random() - 0.5) * window.innerWidth * 0.9;
-          const randY = (Math.random() - 0.5) * window.innerHeight * 0.8;
-          const randRotate = (Math.random() - 0.5) * 360;
-          const randScale = Math.random() * 0.4 + 0.2;
+        const charArray = Array.from(chars) as HTMLElement[];
 
-          gsap.set(el, {
-            x: randX,
-            y: randY,
-            rotation: randRotate,
-            scale: randScale,
-            opacity: 0,
-            filter: 'blur(8px)',
-          });
-        });
-
-        // Phase 1: Characters fade in at scattered positions
-        tl.to(charArray, {
-          opacity: 0.4,
-          scale: 0.6,
-          filter: 'blur(4px)',
-          duration: 0.6,
-          stagger: { each: 0.02, from: 'random' },
-          ease: 'power1.out',
-        });
-
-        // Phase 2: Characters drift toward their position
-        tl.to(
-          charArray,
-          {
-            x: 0,
-            y: 0,
-            rotation: 0,
-            scale: 1,
-            opacity: 1,
-            filter: 'blur(0px)',
-            duration: 1.4,
-            stagger: { each: 0.025, from: 'random' },
-            ease: 'power4.out',
-          },
-          '-=0.3'
-        );
-
-        // Phase 3: Subtle bounce/settle
-        tl.fromTo(
-          charArray,
-          { y: 0 },
-          {
-            y: -4,
-            duration: 0.15,
-            stagger: { each: 0.01, from: 'start' },
-            ease: 'power2.out',
-          },
-          '-=0.2'
-        );
-        tl.to(charArray, {
-          y: 0,
-          duration: 0.3,
-          stagger: { each: 0.01, from: 'start' },
-          ease: 'bounce.out',
-        });
-      }
-
-      // Badge entrance
-      tl.fromTo(
-        badgeRef.current,
-        { opacity: 0, y: 20, scale: 0.9 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'power3.out' },
-        '-=0.6'
-      );
-
-      // Subtext — smooth fade in
-      tl.fromTo(
-        subtextRef.current,
-        { opacity: 0, y: 30, ...(isMobileRef.current ? {} : { filter: 'blur(4px)' }) },
-        { opacity: 1, y: 0, ...(isMobileRef.current ? {} : { filter: 'blur(0px)' }), duration: 1.2, ease: 'power3.out' },
-        '-=0.4'
-      );
-
-      // CTA buttons — smooth fade in
-      tl.fromTo(
-        ctaRef.current,
-        { opacity: 0, y: 30, ...(isMobileRef.current ? {} : { filter: 'blur(4px)' }) },
-        { opacity: 1, y: 0, ...(isMobileRef.current ? {} : { filter: 'blur(0px)' }), duration: 1.2, ease: 'power3.out' },
-        '-=0.8'
-      );
-
-      // After GSAP completes, enable interactive effects
-      tl.call(() => {
-        charArray.forEach((el) => {
-          gsap.set(el, { clearProps: isMobileRef.current ? 'y' : 'x,y,rotation,scale,filter' });
-          el.style.opacity = '1';
-          if (!isMobileRef.current) {
-            el.style.transition = 'transform 0.25s ease-out, filter 0.6s ease-out';
-          }
-        });
+        // Minimal delay to allow first paint, then animate
+        const tl = gsap.timeline({ delay: isMobileRef.current ? 0.3 : 0.15 });
 
         if (isMobileRef.current) {
-          // On mobile, skip the interactive loop entirely
-          animReady.current = true;
-          return;
+          // Mobile: simple fade-in (no scatter, no blur filters)
+          charArray.forEach((el) => {
+            gsap.set(el, { opacity: 0, y: 20 });
+          });
+
+          tl.to(charArray, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: { each: 0.015, from: 'start' },
+            ease: 'power3.out',
+          });
+        } else {
+          // Desktop: full scatter + settle + bounce
+          charArray.forEach((el) => {
+            const randX = (Math.random() - 0.5) * window.innerWidth * 0.9;
+            const randY = (Math.random() - 0.5) * window.innerHeight * 0.8;
+            const randRotate = (Math.random() - 0.5) * 360;
+            const randScale = Math.random() * 0.4 + 0.2;
+
+            gsap.set(el, {
+              x: randX,
+              y: randY,
+              rotation: randRotate,
+              scale: randScale,
+              opacity: 0,
+              filter: 'blur(8px)',
+            });
+          });
+
+          // Phase 1: Characters fade in at scattered positions
+          tl.to(charArray, {
+            opacity: 0.4,
+            scale: 0.6,
+            filter: 'blur(4px)',
+            duration: 0.6,
+            stagger: { each: 0.02, from: 'random' },
+            ease: 'power1.out',
+          });
+
+          // Phase 2: Characters drift toward their position
+          tl.to(
+            charArray,
+            {
+              x: 0,
+              y: 0,
+              rotation: 0,
+              scale: 1,
+              opacity: 1,
+              filter: 'blur(0px)',
+              duration: 1.4,
+              stagger: { each: 0.025, from: 'random' },
+              ease: 'power4.out',
+            },
+            '-=0.3'
+          );
+
+          // Phase 3: Subtle bounce/settle
+          tl.fromTo(
+            charArray,
+            { y: 0 },
+            {
+              y: -4,
+              duration: 0.15,
+              stagger: { each: 0.01, from: 'start' },
+              ease: 'power2.out',
+            },
+            '-=0.2'
+          );
+          tl.to(charArray, {
+            y: 0,
+            duration: 0.3,
+            stagger: { each: 0.01, from: 'start' },
+            ease: 'bounce.out',
+          });
         }
 
-        // Cache positions after a frame
-        requestAnimationFrame(() => {
-          charPositions.current = charArray.map((el) => {
-            const rect = el.getBoundingClientRect();
-            return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 };
-          });
-          animReady.current = true;
-        });
-      });
-
-      // Interactive animation loop — desktop only
-      if (!isMobileRef.current) {
-        let shimmerTimer = 0;
-        const startTime = performance.now();
-        let cachedWrapRect: DOMRect | null = null;
-        let lastRectTime = 0;
-        let isVisible = true;
-
-        // Pause RAF when hero is not visible (saves CPU when scrolled past)
-        const observer = new IntersectionObserver(
-          ([entry]) => {
-            isVisible = entry.isIntersecting;
-            if (isVisible && animReady.current) {
-              rafId.current = requestAnimationFrame(loop);
-            }
-          },
-          { threshold: 0 }
+        // Badge entrance
+        tl.fromTo(
+          badgeRef.current,
+          { opacity: 0, y: 20, scale: 0.9 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'power3.out' },
+          '-=0.6'
         );
-        if (containerRef.current) observer.observe(containerRef.current);
 
-        const loop = (now: number) => {
-          if (!isVisible) return;
+        // Subtext — smooth fade in
+        tl.fromTo(
+          subtextRef.current,
+          { opacity: 0, y: 30, ...(isMobileRef.current ? {} : { filter: 'blur(4px)' }) },
+          { opacity: 1, y: 0, ...(isMobileRef.current ? {} : { filter: 'blur(0px)' }), duration: 1.2, ease: 'power3.out' },
+          '-=0.4'
+        );
+
+        // CTA buttons — smooth fade in
+        tl.fromTo(
+          ctaRef.current,
+          { opacity: 0, y: 30, ...(isMobileRef.current ? {} : { filter: 'blur(4px)' }) },
+          { opacity: 1, y: 0, ...(isMobileRef.current ? {} : { filter: 'blur(0px)' }), duration: 1.2, ease: 'power3.out' },
+          '-=0.8'
+        );
+
+        // After GSAP completes, enable interactive effects
+        tl.call(() => {
+          charArray.forEach((el) => {
+            gsap.set(el, { clearProps: isMobileRef.current ? 'y' : 'x,y,rotation,scale,filter' });
+            el.style.opacity = '1';
+            if (!isMobileRef.current) {
+              el.style.transition = 'transform 0.25s ease-out, filter 0.6s ease-out';
+            }
+          });
+
+          if (isMobileRef.current) {
+            // On mobile, skip the interactive loop entirely
+            animReady.current = true;
+            return;
+          }
+
+          // Cache positions after a frame
+          requestAnimationFrame(() => {
+            charPositions.current = charArray.map((el) => {
+              const rect = el.getBoundingClientRect();
+              return { cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 };
+            });
+            animReady.current = true;
+          });
+        });
+
+        // Interactive animation loop — desktop only
+        if (!isMobileRef.current) {
+          let shimmerTimer = 0;
+          const startTime = performance.now();
+          let cachedWrapRect: DOMRect | null = null;
+          let lastRectTime = 0;
+          let isVisible = true;
+
+          // Pause RAF when hero is not visible (saves CPU when scrolled past)
+          const observer = new IntersectionObserver(
+            ([entry]) => {
+              isVisible = entry.isIntersecting;
+              if (isVisible && animReady.current) {
+                rafId.current = requestAnimationFrame(loop);
+              }
+            },
+            { threshold: 0 }
+          );
+          if (containerRef.current) observer.observe(containerRef.current);
+
+          const loop = (now: number) => {
+            if (!isVisible) return;
+            rafId.current = requestAnimationFrame(loop);
+            if (!animReady.current) return;
+
+            const positions = charPositions.current;
+            if (charArray.length === 0 || positions.length === 0) return;
+
+            const elapsed = now - startTime;
+            const mx = mousePos.current.x;
+            const my = mousePos.current.y;
+
+            if (now - lastRectTime > 500) {
+              cachedWrapRect = headingWrapRef.current?.getBoundingClientRect() ?? null;
+              lastRectTime = now;
+            }
+
+            const mouseNearHeading = cachedWrapRect &&
+              mx > cachedWrapRect.left - 100 && mx < cachedWrapRect.right + 100 &&
+              my > cachedWrapRect.top - 80 && my < cachedWrapRect.bottom + 80;
+
+            for (let i = 0; i < charArray.length; i++) {
+              const el = charArray[i];
+              if (!el) continue;
+
+              const floatY = Math.sin(elapsed * 0.002 + i * 0.4) * 1.5;
+              const floatX = Math.cos(elapsed * 0.0015 + i * 0.3) * 0.5;
+
+              let tx = floatX;
+              let ty = floatY;
+              let rx = 0;
+              let ry = 0;
+
+              if (mouseNearHeading && positions[i]) {
+                const dx = positions[i].cx - mx;
+                const dy = positions[i].cy - my;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const maxDist = 180;
+
+                if (dist < maxDist && dist > 0) {
+                  const strength = (1 - dist / maxDist) * 6;
+                  tx += (dx / dist) * strength;
+                  ty += (dy / dist) * strength;
+                  rx = -(dy / dist) * (1 - dist / maxDist) * 2.5;
+                  ry = (dx / dist) * (1 - dist / maxDist) * 2.5;
+                }
+              }
+
+              el.style.transform = `translate3d(${tx}px, ${ty}px, 0) rotateX(${rx}deg) rotateY(${ry}deg)`;
+            }
+
+            shimmerTimer += 16;
+            if (shimmerTimer > 4000 + Math.random() * 2000) {
+              shimmerTimer = 0;
+              const count = 2 + Math.floor(Math.random() * 2);
+              for (let k = 0; k < count; k++) {
+                const idx = Math.floor(Math.random() * charArray.length);
+                const el = charArray[idx];
+                if (el && !el.classList.contains('hero-char-shimmer')) {
+                  el.classList.add('hero-char-shimmer');
+                  setTimeout(() => el.classList.remove('hero-char-shimmer'), 600);
+                }
+              }
+            }
+          };
+
           rafId.current = requestAnimationFrame(loop);
-          if (!animReady.current) return;
+        }
+      }, containerRef);
+    };
 
-          const positions = charPositions.current;
-          if (charArray.length === 0 || positions.length === 0) return;
-
-          const elapsed = now - startTime;
-          const mx = mousePos.current.x;
-          const my = mousePos.current.y;
-
-          if (now - lastRectTime > 500) {
-            cachedWrapRect = headingWrapRef.current?.getBoundingClientRect() ?? null;
-            lastRectTime = now;
-          }
-
-          const mouseNearHeading = cachedWrapRect &&
-            mx > cachedWrapRect.left - 100 && mx < cachedWrapRect.right + 100 &&
-            my > cachedWrapRect.top - 80 && my < cachedWrapRect.bottom + 80;
-
-          for (let i = 0; i < charArray.length; i++) {
-            const el = charArray[i];
-            if (!el) continue;
-
-            const floatY = Math.sin(elapsed * 0.002 + i * 0.4) * 1.5;
-            const floatX = Math.cos(elapsed * 0.0015 + i * 0.3) * 0.5;
-
-            let tx = floatX;
-            let ty = floatY;
-            let rx = 0;
-            let ry = 0;
-
-            if (mouseNearHeading && positions[i]) {
-              const dx = positions[i].cx - mx;
-              const dy = positions[i].cy - my;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              const maxDist = 180;
-
-              if (dist < maxDist && dist > 0) {
-                const strength = (1 - dist / maxDist) * 6;
-                tx += (dx / dist) * strength;
-                ty += (dy / dist) * strength;
-                rx = -(dy / dist) * (1 - dist / maxDist) * 2.5;
-                ry = (dx / dist) * (1 - dist / maxDist) * 2.5;
-              }
-            }
-
-            el.style.transform = `translate3d(${tx}px, ${ty}px, 0) rotateX(${rx}deg) rotateY(${ry}deg)`;
-          }
-
-          shimmerTimer += 16;
-          if (shimmerTimer > 4000 + Math.random() * 2000) {
-            shimmerTimer = 0;
-            const count = 2 + Math.floor(Math.random() * 2);
-            for (let k = 0; k < count; k++) {
-              const idx = Math.floor(Math.random() * charArray.length);
-              const el = charArray[idx];
-              if (el && !el.classList.contains('hero-char-shimmer')) {
-                el.classList.add('hero-char-shimmer');
-                setTimeout(() => el.classList.remove('hero-char-shimmer'), 600);
-              }
-            }
-          }
-        };
-
-        rafId.current = requestAnimationFrame(loop);
-      }
-    }, containerRef);
+    initAnimation();
 
     // Mouse tracking
     const handleMouseMove = (e: MouseEvent) => {
@@ -504,8 +526,9 @@ export default function Hero() {
     window.addEventListener('resize', handleResize);
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(rafId.current);
-      ctx.revert();
+      ctx?.revert();
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
     };

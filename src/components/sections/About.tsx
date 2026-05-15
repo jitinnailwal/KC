@@ -2,8 +2,6 @@
 
 import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
 
@@ -21,64 +19,76 @@ export default function About() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
+    let ctx: ReturnType<typeof import('gsap')['gsap']['context']> | null = null;
+    let cancelled = false;
 
-    // On mobile, use CSS animation for ticker to avoid scrollWidth forced reflow
-    if (isMobile && tickerRef.current) {
-      const ticker = tickerRef.current;
-      // Measure once, then use CSS animation
-      const tickerWidth = ticker.scrollWidth / 2;
-      ticker.style.setProperty('--ticker-width', `-${tickerWidth}px`);
-      ticker.classList.add('ticker-css-animate');
-    }
+    const init = async () => {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      if (cancelled) return;
 
-    const ctx = gsap.context(() => {
-      // Infinite horizontal ticker — GSAP on desktop only
-      if (!isMobile && tickerRef.current) {
+      gsap.registerPlugin(ScrollTrigger);
+      const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
+
+      // On mobile, use CSS animation for ticker to avoid scrollWidth forced reflow
+      if (isMobile && tickerRef.current) {
         const ticker = tickerRef.current;
         const tickerWidth = ticker.scrollWidth / 2;
-
-        const tickerAnim = gsap.to(ticker, {
-          x: -tickerWidth,
-          duration: 30,
-          ease: 'none',
-          repeat: -1,
-        });
-
-        // Pause ticker when section is off-screen to save GPU
-        ScrollTrigger.create({
-          trigger: ticker,
-          start: 'top bottom',
-          end: 'bottom top',
-          onEnter: () => tickerAnim.play(),
-          onLeave: () => tickerAnim.pause(),
-          onEnterBack: () => tickerAnim.play(),
-          onLeaveBack: () => tickerAnim.pause(),
-        });
+        ticker.style.setProperty('--ticker-width', `-${tickerWidth}px`);
+        ticker.classList.add('ticker-css-animate');
       }
 
-      // Staggered stat cards entrance
-      gsap.fromTo(
-        '.stat-card',
-        { opacity: 0, y: 60, scale: 0.9 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: '.stats-container',
-            start: 'top 80%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
-    }, sectionRef);
+      ctx = gsap.context(() => {
+        // Infinite horizontal ticker — GSAP on desktop only
+        if (!isMobile && tickerRef.current) {
+          const ticker = tickerRef.current;
+          const tickerWidth = ticker.scrollWidth / 2;
 
-    return () => ctx.revert();
+          const tickerAnim = gsap.to(ticker, {
+            x: -tickerWidth,
+            duration: 30,
+            ease: 'none',
+            repeat: -1,
+          });
+
+          ScrollTrigger.create({
+            trigger: ticker,
+            start: 'top bottom',
+            end: 'bottom top',
+            onEnter: () => tickerAnim.play(),
+            onLeave: () => tickerAnim.pause(),
+            onEnterBack: () => tickerAnim.play(),
+            onLeaveBack: () => tickerAnim.pause(),
+          });
+        }
+
+        // Staggered stat cards entrance
+        gsap.fromTo(
+          '.stat-card',
+          { opacity: 0, y: 60, scale: 0.9 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: '.stats-container',
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      }, sectionRef);
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
   }, []);
 
   return (
@@ -161,7 +171,7 @@ export default function About() {
           <div ref={tickerRef} className="flex gap-8 w-max" style={{ willChange: 'transform' }}>
             {[...values, ...values, ...values].map((value, i) => (
               <div key={i} className="flex items-center gap-8 shrink-0">
-                <span className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold text-light-300/20 whitespace-nowrap">
+                <span className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold text-light-300/60 whitespace-nowrap">
                   {value}
                 </span>
                 <span className="w-3 h-3 rounded-full bg-accent-blue/30" />

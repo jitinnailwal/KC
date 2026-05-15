@@ -2,8 +2,6 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
 import AnimatedText from '@/components/ui/AnimatedText';
 
@@ -83,66 +81,91 @@ export default function FeaturedWork() {
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>(fallbackCaseStudies);
 
   useEffect(() => {
-    fetch('/api/case-studies')
-      .then((res) => res.json())
-      .then((data: CaseStudy[]) => {
-        const published = data.filter((cs) => cs.published);
-        if (published.length > 0) {
-          setCaseStudies(published);
-        }
-      })
-      .catch(() => {
-        // Use fallback data
-      });
+    // Defer API fetch until after page is interactive to avoid critical chain
+    const doFetch = () => {
+      fetch('/api/case-studies')
+        .then((res) => res.json())
+        .then((data: CaseStudy[]) => {
+          const published = data.filter((cs) => cs.published);
+          if (published.length > 0) {
+            setCaseStudies(published);
+          }
+        })
+        .catch(() => {
+          // Use fallback data
+        });
+    };
+
+    if ('requestIdleCallback' in window) {
+      const id = (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(doFetch);
+      return () => (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(id);
+    } else {
+      const timer = setTimeout(doFetch, 2000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
     const cards = cardsRef.current;
     if (!section || !cards) return;
 
-    const mm = gsap.matchMedia();
+    let mm: ReturnType<typeof import('gsap')['gsap']['matchMedia']> | null = null;
+    let cancelled = false;
 
-    mm.add('(min-width: 768px)', () => {
-      const totalScrollWidth = cards.scrollWidth - window.innerWidth;
+    const init = async () => {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      if (cancelled) return;
 
-      gsap.to(cards, {
-        x: -totalScrollWidth,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: () => `+=${totalScrollWidth}`,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
+      gsap.registerPlugin(ScrollTrigger);
+      mm = gsap.matchMedia();
+
+      mm.add('(min-width: 768px)', () => {
+        const totalScrollWidth = cards.scrollWidth - window.innerWidth;
+
+        gsap.to(cards, {
+          x: -totalScrollWidth,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: () => `+=${totalScrollWidth}`,
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        const cardElements = cards.querySelectorAll('.project-card');
+        cardElements.forEach((card) => {
+          gsap.fromTo(
+            card,
+            { opacity: 0.4, y: 40 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 1,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'left 90%',
+                end: 'left 50%',
+                scrub: 0.5,
+              },
+            }
+          );
+        });
       });
+    };
 
-      const cardElements = cards.querySelectorAll('.project-card');
-      cardElements.forEach((card) => {
-        gsap.fromTo(
-          card,
-          { opacity: 0.4, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'left 90%',
-              end: 'left 50%',
-              scrub: 0.5,
-            },
-          }
-        );
-      });
-    });
+    init();
 
-    return () => mm.revert();
+    return () => {
+      cancelled = true;
+      mm?.revert();
+    };
   }, [caseStudies]);
 
   return (

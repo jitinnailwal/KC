@@ -2,8 +2,6 @@
 
 import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import AnimatedText from '@/components/ui/AnimatedText';
 
 const services = [
@@ -88,28 +86,42 @@ export default function Services() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.service-card',
-        { opacity: 0, y: 80, rotateX: -10 },
-        {
-          opacity: 1,
-          y: 0,
-          rotateX: 0,
-          duration: 0.9,
-          stagger: 0.2,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: '.services-grid',
-            start: 'top 75%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
-    }, sectionRef);
+    let ctx: ReturnType<typeof import('gsap')['gsap']['context']> | null = null;
+    let cancelled = false;
 
-    return () => ctx.revert();
+    const init = async () => {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      if (cancelled) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          '.service-card',
+          { opacity: 0, y: 80, rotateX: -10 },
+          {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            duration: 0.9,
+            stagger: 0.2,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: '.services-grid',
+              start: 'top 75%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      }, sectionRef);
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
   }, []);
 
   return (

@@ -62,12 +62,24 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <About />
-        <Services />
-        <Testimonials />
-        <FeaturedWork />
-        <Blog />
-        <Contact />
+        <div className="content-defer">
+          <About />
+        </div>
+        <div className="content-defer">
+          <Services />
+        </div>
+        <div className="content-defer">
+          <Testimonials />
+        </div>
+        <div className="content-defer">
+          <FeaturedWork />
+        </div>
+        <div className="content-defer">
+          <Blog />
+        </div>
+        <div className="content-defer">
+          <Contact />
+        </div>
       </main>
       <Footer />
       <ShatteredGlassPopup />
