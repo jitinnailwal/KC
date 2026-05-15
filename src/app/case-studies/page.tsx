@@ -181,13 +181,13 @@ export default function CaseStudiesPage() {
                     <p className="text-light-300/60 leading-relaxed mb-8 max-w-3xl">{study.description}</p>
 
                     {/* Results */}
-                    <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+                    <div className="grid grid-cols-3 gap-4 mb-6">
                       {study.results.map((result) => (
-                        <div key={result.label} className="text-center glass rounded-xl p-2 sm:p-4">
-                          <div className="text-base sm:text-2xl md:text-3xl font-heading font-bold text-gradient mb-1 truncate">
+                        <div key={result.label} className="text-center glass rounded-xl p-4">
+                          <div className="text-lg sm:text-2xl md:text-3xl font-heading font-bold text-gradient mb-1">
                             {result.metric}
                           </div>
-                          <div className="text-[10px] sm:text-xs text-light-300/50 truncate">{result.label}</div>
+                          <div className="text-[10px] sm:text-xs text-light-300/50">{result.label}</div>
                         </div>
                       ))}
                     </div>

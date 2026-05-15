@@ -120,13 +120,13 @@ export default function CaseStudyDetailPage() {
         {/* Results */}
         <section className="px-4 sm:px-6 pb-12">
           <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {study.results.map((result) => (
-                <div key={result.label} className="text-center glass rounded-xl p-2 sm:p-6">
-                  <div className="text-lg sm:text-3xl md:text-4xl font-heading font-bold text-gradient mb-1 sm:mb-2 truncate">
+                <div key={result.label} className="text-center glass rounded-xl p-6">
+                  <div className="text-xl sm:text-3xl md:text-4xl font-heading font-bold text-gradient mb-2">
                     {result.metric}
                   </div>
-                  <div className="text-[10px] sm:text-sm text-light-300/50 truncate">{result.label}</div>
+                  <div className="text-[10px] sm:text-sm text-light-300/50">{result.label}</div>
                 </div>
               ))}
             </div>
