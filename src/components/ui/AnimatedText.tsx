@@ -34,7 +34,7 @@ export default function AnimatedText({ text, className = '', delay = 0, once = t
       className={`inline-block ${className}`}
     >
       {words.map((word, i) => (
-        <span key={i} className="inline-block overflow-hidden mr-[0.3em]">
+        <span key={i} className="inline-block overflow-hidden mr-[0.3em] py-[0.1em]">
           <motion.span
             className="inline-block"
             variants={{

@@ -104,7 +104,7 @@ export default function ServicePageTemplate({ data }: { data: ServicePageData })
             >
               {data.badge}
             </motion.span>
-            <h1 className="font-heading font-bold text-4xl md:text-5xl lg:text-7xl tracking-tight mb-6">
+            <h1 className="font-heading font-bold text-3xl sm:text-4xl md:text-5xl lg:text-7xl tracking-tight mb-6">
               <AnimatedText text={data.headline} />
               <br />
               <span className="text-gradient">
