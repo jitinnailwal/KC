@@ -10,8 +10,6 @@ import Footer from '@/components/layout/Footer';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const services = [
   {
     title: 'SEO Services',
@@ -121,6 +119,7 @@ export default function ServicesPage() {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '.service-detail-card',

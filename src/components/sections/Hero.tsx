@@ -262,8 +262,8 @@ export default function Hero() {
 
       const charArray = Array.from(chars) as HTMLElement[];
 
-      // Longer delay on mobile to allow FCP/LCP to complete first
-      const tl = gsap.timeline({ delay: isMobileRef.current ? 1.0 : 0.6 });
+      // Minimal delay to allow first paint, then animate
+      const tl = gsap.timeline({ delay: isMobileRef.current ? 0.3 : 0.15 });
 
       if (isMobileRef.current) {
         // Mobile: simple fade-in (no scatter, no blur filters)
@@ -570,7 +570,7 @@ export default function Hero() {
         {/* Sub text — Cinematic word-by-word reveal */}
         <div
           ref={subtextRef}
-          className="text-base sm:text-lg md:text-xl text-light-300 max-w-2xl mx-auto mb-12 opacity-0 h-[3.5em] sm:h-[3em] flex items-center justify-center hero-subtext-wrap hero-subtext-sweep"
+          className="text-base sm:text-lg md:text-xl text-light-300 max-w-2xl mx-auto mb-12 opacity-0 min-h-[3.5em] sm:min-h-[3em] flex items-center justify-center hero-subtext-wrap hero-subtext-sweep"
         >
           <CinematicText />
         </div>

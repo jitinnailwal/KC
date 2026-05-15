@@ -306,20 +306,21 @@ body::before {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 0;
-  height: 0;
+  width: 900px;
+  height: 400px;
   border-radius: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(0);
   background: radial-gradient(circle, rgba(79, 140, 255, 0.05) 0%, transparent 70%);
   animation: energy-pulse 6s ease-out infinite;
   pointer-events: none;
   z-index: -1;
+  will-change: transform, opacity;
 }
 
 @keyframes energy-pulse {
-  0%, 80% { width: 0; height: 0; opacity: 0.05; }
-  90% { width: 700px; height: 300px; opacity: 0.04; }
-  100% { width: 900px; height: 400px; opacity: 0; }
+  0%, 80% { transform: translate(-50%, -50%) scale(0); opacity: 0.05; }
+  90% { transform: translate(-50%, -50%) scale(0.78); opacity: 0.04; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
 }
 
 /* 3D perspective container */
@@ -365,7 +366,7 @@ body::before {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 50%;
   height: 100%;
   background: linear-gradient(
@@ -379,12 +380,13 @@ body::before {
   animation: subtext-sweep 10s ease-in-out infinite;
   pointer-events: none;
   z-index: 1;
+  will-change: transform, opacity;
 }
 
 @keyframes subtext-sweep {
-  0%, 70% { left: -100%; opacity: 0; }
+  0%, 70% { transform: translateX(-300%); opacity: 0; }
   80% { opacity: 1; }
-  100% { left: 250%; opacity: 0; }
+  100% { transform: translateX(600%); opacity: 0; }
 }
 
 /* Touch devices — simplified effects */
@@ -398,11 +400,9 @@ body::before {
 }
 
 /* Optimize rendering of off-screen sections */
-@media (max-width: 767px) {
-  .content-defer {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 600px;
-  }
+.content-defer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
 }
 
 /* CSS ticker animation for mobile (avoids GSAP scrollWidth forced reflow) */

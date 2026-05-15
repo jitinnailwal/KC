@@ -8,8 +8,6 @@ import { motion } from 'framer-motion';
 import { fetchJson } from '@/lib/fetch-json';
 import Image from 'next/image';
 
-gsap.registerPlugin(ScrollTrigger);
-
 interface Review {
   id: string;
   quote: string;
@@ -126,6 +124,7 @@ export default function Testimonials() {
   }, []);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
     const cards = cardsRef.current;
     if (!section || !cards) return;

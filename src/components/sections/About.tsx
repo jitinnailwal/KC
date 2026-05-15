@@ -7,8 +7,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const stats = [
   { number: '100+', label: 'Campaigns Delivered' },
   { number: '10X', label: 'Average ROAS' },
@@ -23,6 +21,7 @@ export default function About() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
 
     // On mobile, use CSS animation for ticker to avoid scrollWidth forced reflow
@@ -160,9 +159,9 @@ export default function About() {
         {/* Values infinite ticker */}
         <div className="overflow-hidden py-4">
           <div ref={tickerRef} className="flex gap-8 w-max" style={{ willChange: 'transform' }}>
-            {[...values, ...values, ...values, ...values].map((value, i) => (
+            {[...values, ...values, ...values].map((value, i) => (
               <div key={i} className="flex items-center gap-8 shrink-0">
-                <span className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold text-dark-700/50 whitespace-nowrap">
+                <span className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold text-light-300/20 whitespace-nowrap">
                   {value}
                 </span>
                 <span className="w-3 h-3 rounded-full bg-accent-blue/30" />

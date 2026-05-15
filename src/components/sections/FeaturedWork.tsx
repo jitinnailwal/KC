@@ -7,8 +7,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
 import AnimatedText from '@/components/ui/AnimatedText';
 
-gsap.registerPlugin(ScrollTrigger);
-
 interface CaseStudy {
   id: string;
   client: string;
@@ -99,6 +97,7 @@ export default function FeaturedWork() {
   }, []);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
     const cards = cardsRef.current;
     if (!section || !cards) return;

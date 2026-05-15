@@ -9,8 +9,6 @@ import Footer from '@/components/layout/Footer';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const coreValues = [
   {
     title: 'Integrity',
@@ -206,6 +204,7 @@ export default function AboutPage() {
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '.value-card',

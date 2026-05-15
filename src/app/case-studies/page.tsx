@@ -10,8 +10,6 @@ import Footer from '@/components/layout/Footer';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
 
-gsap.registerPlugin(ScrollTrigger);
-
 interface CaseStudy {
   id: string;
   client: string;
@@ -94,6 +92,7 @@ export default function CaseStudiesPage() {
   }, []);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '.case-study-card',

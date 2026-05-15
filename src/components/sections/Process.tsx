@@ -6,8 +6,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import AnimatedText from '@/components/ui/AnimatedText';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const steps = [
   {
     number: '01',
@@ -39,6 +37,7 @@ export default function Process() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       // Animate the connecting line drawing
       gsap.fromTo(

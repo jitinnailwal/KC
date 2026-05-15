@@ -8,8 +8,6 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import GlassCard from '@/components/ui/GlassCard';
 
-gsap.registerPlugin(ScrollTrigger);
-
 const triplePlayPillars = [
   {
     title: 'SEO',
@@ -51,6 +49,7 @@ export default function TriplePlayModelPage() {
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
       gsap.fromTo(
         '.pillar-card',
