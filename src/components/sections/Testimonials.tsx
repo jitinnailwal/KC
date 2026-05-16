@@ -17,7 +17,6 @@ interface Review {
   image?: string;
 }
 
-// Fallback testimonials in case API is unavailable
 const fallbackTestimonials: Review[] = [
   {
     id: '1',
@@ -139,10 +138,14 @@ export default function Testimonials() {
 
       mm.add('(min-width: 768px)', () => {
         const totalScrollWidth = cards.scrollWidth - window.innerWidth;
-        // Subtract section height from pin duration so the next section
-        // arrives at exactly the moment the pin ends — zero gap.
-        const sectionH = section.offsetHeight;
-        const pinEnd = Math.max(totalScrollWidth * 0.5, totalScrollWidth - sectionH);
+
+        // Set the manual spacer height so the next section arrives
+        // exactly when this pin ends. 20px extra for breathing room.
+        const spacer = document.getElementById('testimonials-spacer');
+        if (spacer) {
+          const gap = 20;
+          spacer.style.height = `${Math.max(0, totalScrollWidth - section.offsetHeight + gap)}px`;
+        }
 
         gsap.to(cards, {
           x: -totalScrollWidth,
@@ -150,11 +153,20 @@ export default function Testimonials() {
           scrollTrigger: {
             trigger: section,
             start: 'top top',
-            end: () => `+=${pinEnd}`,
+            end: () => `+=${totalScrollWidth}`,
             pin: true,
+            pinSpacing: false,
             scrub: 1,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            onRefresh: () => {
+              // Recalculate spacer on resize
+              const s = document.getElementById('testimonials-spacer');
+              if (s) {
+                const sw = cards.scrollWidth - window.innerWidth;
+                s.style.height = `${Math.max(0, sw - section.offsetHeight + 20)}px`;
+              }
+            },
           },
         });
 
@@ -185,11 +197,17 @@ export default function Testimonials() {
             scrollTrigger: {
               trigger: section,
               start: 'top top',
-              end: () => `+=${pinEnd}`,
+              end: () => `+=${totalScrollWidth}`,
               scrub: 1,
             },
           });
         }
+
+        // Cleanup: reset spacer when media query no longer matches
+        return () => {
+          const s = document.getElementById('testimonials-spacer');
+          if (s) s.style.height = '0px';
+        };
       });
     };
 
@@ -198,11 +216,13 @@ export default function Testimonials() {
     return () => {
       cancelled = true;
       mm?.revert();
+      const s = document.getElementById('testimonials-spacer');
+      if (s) s.style.height = '0px';
     };
   }, [testimonials]);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-dark-900 z-[1]">
+    <section ref={sectionRef} className="relative overflow-hidden bg-[#0a0a0a]">
       {/* Background effects */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -257,7 +277,7 @@ export default function Testimonials() {
       {/* Desktop: Horizontal scrolling cards */}
       <div
         ref={cardsRef}
-        className="hidden md:flex gap-6 lg:gap-8 px-6 py-8 w-max"
+        className="hidden md:flex gap-6 lg:gap-8 px-6 py-6 w-max"
         style={{ willChange: 'transform' }}
       >
         {testimonials.map((testimonial, i) => (
@@ -268,7 +288,6 @@ export default function Testimonials() {
             <TestimonialCard testimonial={testimonial} index={i} />
           </div>
         ))}
-        {/* End spacer */}
         <div className="w-[10vw] shrink-0" />
       </div>
 

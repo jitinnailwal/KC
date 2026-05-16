@@ -81,7 +81,6 @@ export default function FeaturedWork() {
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>(fallbackCaseStudies);
 
   useEffect(() => {
-    // Defer API fetch until after page is interactive to avoid critical chain
     const doFetch = () => {
       fetch('/api/case-studies')
         .then((res) => res.json())
@@ -91,9 +90,7 @@ export default function FeaturedWork() {
             setCaseStudies(published);
           }
         })
-        .catch(() => {
-          // Use fallback data
-        });
+        .catch(() => {});
     };
 
     if ('requestIdleCallback' in window) {
@@ -169,9 +166,9 @@ export default function FeaturedWork() {
   }, [caseStudies]);
 
   return (
-    <section id="work" ref={sectionRef} className="relative overflow-hidden bg-dark-900 z-[2]">
+    <section id="work" ref={sectionRef} className="relative overflow-hidden bg-[#0a0a0a] z-[2]">
       {/* Header */}
-      <div className="pt-16 md:pt-20 pb-4 px-4 sm:px-6">
+      <div className="pt-5 pb-4 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
             <div>

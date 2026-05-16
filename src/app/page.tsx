@@ -54,6 +54,7 @@ export default function Home() {
         <About />
         <Services />
         <Testimonials />
+        <div id="testimonials-spacer" className="hidden md:block bg-[#0a0a0a]" />
         <FeaturedWork />
         <Blog />
         <Contact />
