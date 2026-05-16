@@ -3,8 +3,8 @@ import { cookies } from 'next/headers';
 
 export const runtime = 'nodejs';
 
-const ADMIN_USER = process.env.ADMIN_USER || 'kreative';
-const ADMIN_PASS = process.env.ADMIN_PASS || 'catalyst';
+const ADMIN_USER = process.env.ADMIN_USER;
+const ADMIN_PASS = process.env.ADMIN_PASS;
 const SESSION_NAME = 'kc_admin_session';
 const SESSION_VALUE = 'authenticated';
 const MAX_AGE = 60 * 60 * 24; // 24 hours
@@ -13,6 +13,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { username, password } = body as { username?: string; password?: string };
+
+    if (!ADMIN_USER || !ADMIN_PASS) {
+      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+    }
 
     if (username === ADMIN_USER && password === ADMIN_PASS) {
       const cookieStore = await cookies();

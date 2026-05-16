@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jsonError } from '@/lib/api-error';
+import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackBlogs } from '@/lib/fallback-content';
 import Blog from '@/models/Blog';
@@ -45,6 +46,9 @@ export async function GET() {
 
 // POST create new blog
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
 

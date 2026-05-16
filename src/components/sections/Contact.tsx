@@ -2,8 +2,6 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
 
@@ -50,27 +48,41 @@ export default function Contact() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.contact-card',
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          stagger: 0.15,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: '.contact-grid',
-            start: 'top 80%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
-    }, sectionRef);
+    let ctx: ReturnType<typeof import('gsap')['gsap']['context']> | null = null;
+    let cancelled = false;
 
-    return () => ctx.revert();
+    const init = async () => {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      if (cancelled) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+      ctx = gsap.context(() => {
+        gsap.fromTo(
+          '.contact-card',
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.15,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: '.contact-grid',
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      }, sectionRef);
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      ctx?.revert();
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

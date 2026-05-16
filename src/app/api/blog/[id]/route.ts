@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jsonError } from '@/lib/api-error';
+import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackBlog } from '@/lib/fallback-content';
 import Blog from '@/models/Blog';
@@ -54,6 +55,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
 
@@ -95,6 +99,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   try {
     await dbConnect();
     const blog = await Blog.findByIdAndDelete(params.id);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jsonError } from '@/lib/api-error';
+import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackCaseStudies } from '@/lib/fallback-content';
 import CaseStudy from '@/models/CaseStudy';
@@ -39,6 +40,9 @@ export async function GET() {
 
 // POST create new case study
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
 

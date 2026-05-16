@@ -1,8 +1,6 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import AnimatedText from '@/components/ui/AnimatedText';
 import { motion } from 'framer-motion';
 import { fetchJson } from '@/lib/fetch-json';
@@ -124,69 +122,79 @@ export default function Testimonials() {
   }, []);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
     const section = sectionRef.current;
     const cards = cardsRef.current;
     if (!section || !cards) return;
 
-    // Only enable horizontal scroll on desktop
-    const mm = gsap.matchMedia();
+    let mm: ReturnType<typeof import('gsap')['gsap']['matchMedia']> | null = null;
+    let cancelled = false;
 
-    mm.add('(min-width: 768px)', () => {
-      const totalScrollWidth = cards.scrollWidth - window.innerWidth;
+    const init = async () => {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      if (cancelled) return;
 
-      // Horizontal scroll animation
-      gsap.to(cards, {
-        x: -totalScrollWidth,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: () => `+=${totalScrollWidth}`,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
+      gsap.registerPlugin(ScrollTrigger);
+      mm = gsap.matchMedia();
 
-      // Animate each card as it enters viewport
-      const cardElements = cards.querySelectorAll('.testimonial-card');
-      cardElements.forEach((card) => {
-        gsap.fromTo(
-          card,
-          { opacity: 0.3, scale: 0.95 },
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: card,
-              start: 'left 90%',
-              end: 'left 50%',
-              scrub: 0.5,
-            },
-          }
-        );
-      });
+      mm.add('(min-width: 768px)', () => {
+        const totalScrollWidth = cards.scrollWidth - window.innerWidth;
 
-      // Animate the progress bar
-      if (progressRef.current) {
-        gsap.to(progressRef.current, {
-          scaleX: 1,
+        gsap.to(cards, {
+          x: -totalScrollWidth,
           ease: 'none',
           scrollTrigger: {
             trigger: section,
             start: 'top top',
             end: () => `+=${totalScrollWidth}`,
+            pin: true,
             scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
           },
         });
-      }
-    });
 
-    return () => mm.revert();
+        const cardElements = cards.querySelectorAll('.testimonial-card');
+        cardElements.forEach((card) => {
+          gsap.fromTo(
+            card,
+            { opacity: 0.3, scale: 0.95 },
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 1,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'left 90%',
+                end: 'left 50%',
+                scrub: 0.5,
+              },
+            }
+          );
+        });
+
+        if (progressRef.current) {
+          gsap.to(progressRef.current, {
+            scaleX: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top top',
+              end: () => `+=${totalScrollWidth}`,
+              scrub: 1,
+            },
+          });
+        }
+      });
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+      mm?.revert();
+    };
   }, [testimonials]);
 
   return (

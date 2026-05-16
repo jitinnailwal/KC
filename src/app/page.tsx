@@ -37,13 +37,7 @@ export default function Home() {
       }, 1000);
     };
 
-    // Use requestIdleCallback on mobile to further defer, immediate on desktop
-    const isMobile = window.innerWidth < 768;
-    if (isMobile && 'requestIdleCallback' in window) {
-      (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(init);
-    } else {
-      init();
-    }
+    init();
 
     return () => {
       cleanedUp = true;
@@ -62,24 +56,12 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        <div className="content-defer">
-          <About />
-        </div>
-        <div className="content-defer">
-          <Services />
-        </div>
-        <div className="content-defer">
-          <Testimonials />
-        </div>
-        <div className="content-defer">
-          <FeaturedWork />
-        </div>
-        <div className="content-defer">
-          <Blog />
-        </div>
-        <div className="content-defer">
-          <Contact />
-        </div>
+        <About />
+        <Services />
+        <Testimonials />
+        <FeaturedWork />
+        <Blog />
+        <Contact />
       </main>
       <Footer />
       <ShatteredGlassPopup />
