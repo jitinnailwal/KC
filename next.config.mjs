@@ -16,7 +16,7 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   experimental: {
-    optimizePackageImports: ['framer-motion', 'gsap'],
+    optimizePackageImports: ['framer-motion'],
   },
   async headers() {
     const securityHeaders = [

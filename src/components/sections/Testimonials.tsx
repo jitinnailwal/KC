@@ -131,6 +131,7 @@ export default function Testimonials() {
     const init = async () => {
       const { gsap } = await import('gsap');
       const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const { getLenis } = await import('@/lib/smooth-scroll');
       if (cancelled) return;
 
       gsap.registerPlugin(ScrollTrigger);
@@ -147,7 +148,7 @@ export default function Testimonials() {
           spacer.style.height = `${Math.max(0, totalScrollWidth - section.offsetHeight + gap)}px`;
         }
 
-        gsap.to(cards, {
+        const horizontalScroll = gsap.to(cards, {
           x: -totalScrollWidth,
           ease: 'none',
           scrollTrigger: {
@@ -156,7 +157,7 @@ export default function Testimonials() {
             end: () => `+=${totalScrollWidth}`,
             pin: true,
             pinSpacing: false,
-            scrub: 1,
+            scrub: 0.8,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onRefresh: () => {
@@ -170,6 +171,14 @@ export default function Testimonials() {
           },
         });
 
+        // Connect Lenis scroll velocity for smoother horizontal feel
+        const lenis = getLenis();
+        if (lenis) {
+          lenis.on('scroll', () => {
+            ScrollTrigger.update();
+          });
+        }
+
         const cardElements = cards.querySelectorAll('.testimonial-card');
         cardElements.forEach((card) => {
           gsap.fromTo(
@@ -182,6 +191,7 @@ export default function Testimonials() {
               ease: 'power2.out',
               scrollTrigger: {
                 trigger: card,
+                containerAnimation: horizontalScroll,
                 start: 'left 90%',
                 end: 'left 50%',
                 scrub: 0.5,
@@ -198,7 +208,7 @@ export default function Testimonials() {
               trigger: section,
               start: 'top top',
               end: () => `+=${totalScrollWidth}`,
-              scrub: 1,
+              scrub: 0.8,
             },
           });
         }

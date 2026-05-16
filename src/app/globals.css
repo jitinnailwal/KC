@@ -1,5 +1,7 @@
 /* Fonts loaded via layout.tsx <link> with preconnect for faster loading */
 
+@import 'lenis/dist/lenis.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
