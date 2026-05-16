@@ -98,17 +98,16 @@ export default function Services() {
       ctx = gsap.context(() => {
         gsap.fromTo(
           '.service-card',
-          { opacity: 0, y: 80, rotateX: -10 },
+          { opacity: 0, y: 40 },
           {
             opacity: 1,
             y: 0,
-            rotateX: 0,
-            duration: 0.9,
-            stagger: 0.2,
-            ease: 'power3.out',
+            duration: 0.5,
+            stagger: 0.08,
+            ease: 'power2.out',
             scrollTrigger: {
               trigger: '.services-grid',
-              start: 'top 75%',
+              start: 'top 90%',
               toggleActions: 'play none none none',
             },
           }

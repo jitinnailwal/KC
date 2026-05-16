@@ -24,7 +24,7 @@ export default function AnimatedText({ text, className = '', delay = 0 }: Animat
           observer.disconnect();
         }
       },
-      { rootMargin: '-50px' }
+      { rootMargin: '0px', threshold: 0.1 }
     );
     observer.observe(el);
     return () => observer.disconnect();
