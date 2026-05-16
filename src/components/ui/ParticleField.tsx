@@ -131,13 +131,11 @@ export default function ParticleField() {
     };
   }, [isMobile]);
 
-  if (isMobile) return null;
-
   return (
     <canvas
       ref={canvasRef}
       className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.6 }}
+      style={{ opacity: 0.6, display: isMobile ? 'none' : undefined }}
       aria-hidden="true"
     />
   );

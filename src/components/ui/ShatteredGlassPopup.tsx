@@ -410,7 +410,10 @@ export default function ShatteredGlassPopup() {
     previousFocusRef.current?.focus();
   };
 
-  const prefersReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [prefersReduced, setPrefersReduced] = useState(false);
+  useEffect(() => {
+    setPrefersReduced(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }, []);
 
   if (!isOpen && !toast.visible) return null;
 
