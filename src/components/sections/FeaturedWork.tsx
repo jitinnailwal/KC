@@ -169,9 +169,9 @@ export default function FeaturedWork() {
   }, [caseStudies]);
 
   return (
-    <section id="work" ref={sectionRef} className="relative overflow-hidden">
+    <section id="work" ref={sectionRef} className="relative overflow-hidden bg-dark-900 z-[1] md:h-screen md:flex md:flex-col">
       {/* Header */}
-      <div className="pt-16 md:pt-20 pb-4 px-4 sm:px-6">
+      <div className="pt-16 md:pt-12 pb-4 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
             <div>
@@ -212,7 +212,7 @@ export default function FeaturedWork() {
       </div>
 
       {/* Desktop: Horizontal scroll */}
-      <div ref={cardsRef} className="hidden md:flex gap-8 px-6 py-6 w-max items-start">
+      <div ref={cardsRef} className="hidden md:flex gap-8 px-6 py-4 w-max flex-1 items-center">
         {caseStudies.map((study, i) => (
           <Link
             key={study.id}

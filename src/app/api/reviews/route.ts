@@ -7,23 +7,27 @@ import Review from '@/models/Review';
 
 export const runtime = 'nodejs';
 
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+};
+
 // GET all reviews
 export async function GET() {
   try {
     await dbConnect();
-    const reviews = await Review.find().sort({ date: -1 });
+    const reviews = await Review.find().sort({ date: -1 }).lean();
     if (reviews.length === 0) {
       return NextResponse.json(getFallbackReviews(), {
-        headers: { 'X-Data-Source': 'fallback-json' },
+        headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },
       });
     }
-    return NextResponse.json(reviews);
+    return NextResponse.json(reviews, { headers: CACHE_HEADERS });
   } catch (error) {
     if (isMongoConnectionError(error)) {
       console.info('MongoDB unavailable for reviews. Serving fallback JSON content.');
 
       return NextResponse.json(getFallbackReviews(), {
-        headers: { 'X-Data-Source': 'fallback-json' },
+        headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },
       });
     }
 
@@ -42,6 +46,20 @@ export async function POST(request: NextRequest) {
     if (!body.quote?.trim() || !body.name?.trim()) {
       return NextResponse.json(
         { error: 'Quote and name are required' },
+        { status: 400 }
+      );
+    }
+
+    if (body.name.length > 200) {
+      return NextResponse.json(
+        { error: 'Name must be 200 characters or less' },
+        { status: 400 }
+      );
+    }
+
+    if (body.quote.length > 5000) {
+      return NextResponse.json(
+        { error: 'Quote must be 5,000 characters or less' },
         { status: 400 }
       );
     }

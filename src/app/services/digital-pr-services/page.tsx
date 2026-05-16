@@ -1,5 +1,16 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Digital PR | Kreative Catalyst',
+  description: 'Build visibility, authority, and credibility through strategic media outreach. Get your brand seen, mentioned, and trusted on publications and industry platforms.',
+  openGraph: {
+    title: 'Digital PR | Kreative Catalyst',
+    description: 'Build brand visibility, authority, and credibility through strategic media outreach and digital PR.',
+    url: 'https://kreativecatalyst.in/services/digital-pr-services',
+  },
+};
 
 const data: ServicePageData = {
   badge: 'Digital PR Services',

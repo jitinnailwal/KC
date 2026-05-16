@@ -62,6 +62,14 @@ export default function GalaxyBackground() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // On mobile/touch: skip all canvas animation entirely for performance
+    const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
+    if (isMobile) {
+      canvas.style.display = 'none';
+      return;
+    }
+
     const ctx = canvas.getContext('2d', { willReadFrequently: false });
     if (!ctx) return;
 
@@ -69,9 +77,8 @@ export default function GalaxyBackground() {
     let height = 0;
     let centerX = 0;
     let centerY = 0;
-    const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
 
-    const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const resize = () => {
       width = window.innerWidth;
@@ -106,7 +113,7 @@ export default function GalaxyBackground() {
     ];
 
     // Create stars
-    const starCount = isMobile ? 100 : 400;
+    const starCount = isMobile ? 60 : 300;
     const stars: Star[] = Array.from({ length: starCount }, () => ({
       x: (Math.random() - 0.5) * width * 2.5,
       y: (Math.random() - 0.5) * height * 2.5,
@@ -158,7 +165,7 @@ export default function GalaxyBackground() {
       [140, 180, 255],  // light blue
     ];
 
-    const orbitParticleCount = isMobile ? 20 : 80;
+    const orbitParticleCount = isMobile ? 12 : 60;
     const orbitParticles: OrbitParticle[] = Array.from({ length: orbitParticleCount }, () => {
       const radiusBase = Math.random() * 180 + 100; // 100-280px from center
       return {
@@ -182,7 +189,7 @@ export default function GalaxyBackground() {
 
     // Galaxy spiral arm dust — pre-compute positions for performance
     const arms = 3;
-    const armPoints = isMobile ? 30 : 100;
+    const armPoints = isMobile ? 15 : 80;
     const spiralTightness = 0.4;
     const spiralDust: { armOffset: number; j: number; dist: number; spread: number; size: number; fade: number }[] = [];
     for (let arm = 0; arm < arms; arm++) {
@@ -223,6 +230,8 @@ export default function GalaxyBackground() {
     const frameInterval = isMobile ? 33 : 0; // ~30fps on mobile, uncapped on desktop
 
     const animate = (timestamp: number) => {
+      if (!isVisible) return;
+
       // Frame throttling on mobile
       if (isMobile && timestamp - lastFrameTime < frameInterval) {
         animId.current = requestAnimationFrame(animate);
@@ -450,61 +459,63 @@ export default function GalaxyBackground() {
         }
       }
 
-      // Draw connection lines (desktop only)
+      // Draw connection lines (desktop only, batched into single path)
       if (!isMobile) {
-        // Collect particles near mouse for connection line checks
+        const connectRadiusSq = connectRadius * connectRadius;
+        const lineMaxDist = 120;
+        const lineMaxDistSq = lineMaxDist * lineMaxDist;
+
+        // Collect particles near mouse (cap at 15 to limit O(n²))
         const nearMouse: OrbitParticle[] = [];
-        for (let i = 0; i < orbitParticles.length; i++) {
+        for (let i = 0; i < orbitParticles.length && nearMouse.length < 15; i++) {
           const p = orbitParticles[i];
           const dxm = p.currentX - mouseX;
           const dym = p.currentY - mouseY;
-          if (dxm * dxm + dym * dym < connectRadius * connectRadius) {
+          if (dxm * dxm + dym * dym < connectRadiusSq) {
             nearMouse.push(p);
           }
         }
 
-        // Draw lines between nearby particles that are both near mouse
-        const lineMaxDist = 120;
-        for (let i = 0; i < nearMouse.length; i++) {
-          for (let j = i + 1; j < nearMouse.length; j++) {
-            const a = nearMouse[i];
-            const b = nearMouse[j];
-            const dxp = a.currentX - b.currentX;
-            const dyp = a.currentY - b.currentY;
-            const distSq = dxp * dxp + dyp * dyp;
-            if (distSq < lineMaxDist * lineMaxDist) {
-              const dist = Math.sqrt(distSq);
-              const lineAlpha = (1 - dist / lineMaxDist) * 0.25;
-              ctx.beginPath();
-              ctx.moveTo(a.currentX, a.currentY);
-              ctx.lineTo(b.currentX, b.currentY);
-              ctx.strokeStyle = `rgba(79, 140, 255, ${lineAlpha})`;
-              ctx.lineWidth = 0.6;
-              ctx.stroke();
+        // Batch draw lines using a single stroke style
+        if (nearMouse.length > 1) {
+          ctx.strokeStyle = 'rgba(79, 140, 255, 0.15)';
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          for (let i = 0; i < nearMouse.length; i++) {
+            for (let j = i + 1; j < nearMouse.length; j++) {
+              const a = nearMouse[i];
+              const b = nearMouse[j];
+              const dxp = a.currentX - b.currentX;
+              const dyp = a.currentY - b.currentY;
+              const distSq = dxp * dxp + dyp * dyp;
+              if (distSq < lineMaxDistSq) {
+                ctx.moveTo(a.currentX, a.currentY);
+                ctx.lineTo(b.currentX, b.currentY);
+              }
             }
           }
+          ctx.stroke();
         }
 
-        // Draw faint connection lines from attracted particles to heading center when mouse is in heading
+        // Heading attraction lines (batched)
         if (mouseInHeading) {
+          ctx.strokeStyle = 'rgba(79, 140, 255, 0.1)';
+          ctx.lineWidth = 0.4;
+          ctx.beginPath();
           for (let i = 0; i < orbitParticles.length; i++) {
             const p = orbitParticles[i];
             const clampX = Math.max(headingBounds.left, Math.min(headingBounds.right, p.currentX));
             const clampY = Math.max(headingBounds.top, Math.min(headingBounds.bottom, p.currentY));
             const dxh = p.currentX - clampX;
             const dyh = p.currentY - clampY;
-            const distH = Math.sqrt(dxh * dxh + dyh * dyh);
+            const distSq = dxh * dxh + dyh * dyh;
 
-            if (distH < 80 && distH > 5) {
-              const lineAlpha = (1 - distH / 80) * 0.12;
-              ctx.beginPath();
+            if (distSq < 6400 && distSq > 25) { // 80² = 6400, 5² = 25
               ctx.moveTo(p.currentX, p.currentY);
               ctx.lineTo(clampX, clampY);
-              ctx.strokeStyle = `rgba(79, 140, 255, ${lineAlpha})`;
-              ctx.lineWidth = 0.4;
-              ctx.stroke();
             }
           }
+          ctx.stroke();
         }
       }
 
@@ -553,10 +564,27 @@ export default function GalaxyBackground() {
       animId.current = requestAnimationFrame(animate);
     };
 
+    // Only animate when canvas is visible (saves CPU when scrolled past)
+    let isVisible = true;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible) {
+          lastTime.current = 0; // reset delta to avoid time jump
+          animId.current = requestAnimationFrame(animate);
+        } else {
+          cancelAnimationFrame(animId.current);
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(canvas);
+
     animId.current = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(animId.current);
+      observer.disconnect();
       if (shootingInterval) clearInterval(shootingInterval);
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMouseMove);
@@ -567,15 +595,23 @@ export default function GalaxyBackground() {
     <>
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full hidden md:block"
         style={{ zIndex: 0 }}
       />
-      {/* CSS vignette overlay for mobile (avoids per-frame radial gradient) */}
+      {/* Static CSS background for mobile — zero JS overhead */}
+      <div
+        className="absolute inset-0 w-full h-full md:hidden"
+        style={{
+          zIndex: 0,
+          background: 'radial-gradient(ellipse at center, rgba(15, 10, 40, 0.8) 0%, #050510 70%)',
+        }}
+      />
+      {/* Vignette for mobile */}
       <div
         className="absolute inset-0 w-full h-full pointer-events-none md:hidden"
         style={{
           zIndex: 0,
-          background: 'radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%)',
+          background: 'radial-gradient(ellipse at center, rgba(79,140,255,0.03) 0%, transparent 50%), radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%)',
         }}
       />
     </>

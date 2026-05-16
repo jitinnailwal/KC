@@ -3,16 +3,14 @@ import { jsonError } from '@/lib/api-error';
 import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackCaseStudy } from '@/lib/fallback-content';
+import { generateSlug } from '@/lib/utils';
 import CaseStudy from '@/models/CaseStudy';
 
 export const runtime = 'nodejs';
 
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+};
 
 // GET single case study
 export async function GET(
@@ -21,11 +19,11 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const caseStudy = await CaseStudy.findById(params.id);
+    const caseStudy = await CaseStudy.findById(params.id).lean();
     if (!caseStudy) {
       return NextResponse.json({ error: 'Case study not found' }, { status: 404 });
     }
-    return NextResponse.json(caseStudy);
+    return NextResponse.json(caseStudy, { headers: CACHE_HEADERS });
   } catch (error) {
     if (isMongoConnectionError(error)) {
       console.info('MongoDB unavailable for case study lookup. Serving fallback JSON content.');
@@ -36,7 +34,7 @@ export async function GET(
       }
 
       return NextResponse.json(caseStudy, {
-        headers: { 'X-Data-Source': 'fallback-json' },
+        headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },
       });
     }
 

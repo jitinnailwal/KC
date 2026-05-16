@@ -3,22 +3,14 @@ import { jsonError } from '@/lib/api-error';
 import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackBlog } from '@/lib/fallback-content';
+import { generateSlug, estimateReadTime } from '@/lib/utils';
 import Blog from '@/models/Blog';
 
 export const runtime = 'nodejs';
 
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
-function estimateReadTime(content: string): string {
-  const words = content.trim().split(/\s+/).length;
-  const minutes = Math.max(1, Math.ceil(words / 200));
-  return `${minutes} min read`;
-}
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+};
 
 // GET single blog
 export async function GET(
@@ -27,11 +19,11 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const blog = await Blog.findById(params.id);
+    const blog = await Blog.findById(params.id).lean();
     if (!blog) {
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
-    return NextResponse.json(blog);
+    return NextResponse.json(blog, { headers: CACHE_HEADERS });
   } catch (error) {
     if (isMongoConnectionError(error)) {
       console.info('MongoDB unavailable for blog post lookup. Serving fallback JSON content.');
@@ -42,7 +34,7 @@ export async function GET(
       }
 
       return NextResponse.json(blog, {
-        headers: { 'X-Data-Source': 'fallback-json' },
+        headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },
       });
     }
 

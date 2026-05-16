@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -19,7 +20,26 @@ function sanitize(str: string): string {
     .replace(/'/g, '&#039;');
 }
 
+function getClientIp(request: NextRequest): string {
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || request.headers.get('x-real-ip')
+    || 'unknown';
+}
+
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const { allowed, resetIn } = checkRateLimit(`contact:${ip}`, {
+    maxRequests: 5,
+    windowMs: 60_000,
+  });
+
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(resetIn / 1000)) } }
+    );
+  }
+
   try {
     const body = await request.json();
 
@@ -34,6 +54,27 @@ export async function POST(request: NextRequest) {
     if (!name?.trim() || !email?.trim()) {
       return NextResponse.json(
         { error: 'Name and email are required' },
+        { status: 400 }
+      );
+    }
+
+    if (name.length > 200) {
+      return NextResponse.json(
+        { error: 'Name must be 200 characters or less' },
+        { status: 400 }
+      );
+    }
+
+    if (email.length > 320) {
+      return NextResponse.json(
+        { error: 'Email must be 320 characters or less' },
+        { status: 400 }
+      );
+    }
+
+    if (message && message.length > 5000) {
+      return NextResponse.json(
+        { error: 'Message must be 5,000 characters or less' },
         { status: 400 }
       );
     }

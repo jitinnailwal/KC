@@ -24,13 +24,11 @@ export default function Home() {
     const init = async () => {
       const { gsap } = await import('gsap');
       const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-      const { initSmoothScroll } = await import('@/lib/smooth-scroll');
 
       if (cleanedUp) return;
 
       gsap.registerPlugin(ScrollTrigger);
       ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
-      initSmoothScroll();
 
       timer = setTimeout(() => {
         ScrollTrigger.refresh();
@@ -45,16 +43,13 @@ export default function Home() {
       import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
         ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       });
-      import('@/lib/smooth-scroll').then(({ destroySmoothScroll }) => {
-        destroySmoothScroll();
-      });
     };
   }, []);
 
   return (
     <>
       <Navbar />
-      <main>
+      <main id="main-content">
         <Hero />
         <About />
         <Services />

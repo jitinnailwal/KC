@@ -1,5 +1,16 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'SEO Services | Kreative Catalyst',
+  description: 'We help your business rank higher on Google through proven SEO strategies. From keyword research to technical audits, we ensure your website attracts organic traffic that converts into leads and sales.',
+  openGraph: {
+    title: 'SEO Services | Kreative Catalyst',
+    description: 'Rank higher on Google with proven SEO strategies. Keyword research, technical audits, and organic traffic that converts.',
+    url: 'https://kreativecatalyst.in/services/seo-services',
+  },
+};
 
 const data: ServicePageData = {
   badge: 'SEO Services',

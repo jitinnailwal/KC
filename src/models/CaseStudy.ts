@@ -48,4 +48,7 @@ const CaseStudySchema = new Schema<ICaseStudy>(
   }
 );
 
+CaseStudySchema.index({ date: -1 });
+CaseStudySchema.index({ slug: 1 });
+
 export default mongoose.models.CaseStudy || mongoose.model<ICaseStudy>('CaseStudy', CaseStudySchema);

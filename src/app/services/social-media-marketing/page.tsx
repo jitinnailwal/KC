@@ -1,5 +1,16 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Social Media Marketing | Kreative Catalyst',
+  description: "Turn likes, shares, and hashtags into leads, sales, and success. Scroll-stopping content and ROI-driven campaigns that make your competition wish they'd hired us first.",
+  openGraph: {
+    title: 'Social Media Marketing | Kreative Catalyst',
+    description: 'Scroll-stopping content and ROI-driven social media campaigns that turn engagement into real business results.',
+    url: 'https://kreativecatalyst.in/services/social-media-marketing',
+  },
+};
 
 const data: ServicePageData = {
   badge: 'Social Media Marketing',

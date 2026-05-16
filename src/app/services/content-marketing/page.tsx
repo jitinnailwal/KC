@@ -1,5 +1,16 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Content Marketing | Kreative Catalyst',
+  description: 'Stop publishing content that nobody reads. We create strategic, SEO-optimized content that builds trust, improves visibility, and drives real business growth.',
+  openGraph: {
+    title: 'Content Marketing | Kreative Catalyst',
+    description: 'Strategic, SEO-optimized content that builds trust, improves visibility, and drives real business growth.',
+    url: 'https://kreativecatalyst.in/services/content-marketing',
+  },
+};
 
 const data: ServicePageData = {
   badge: 'Content Marketing',

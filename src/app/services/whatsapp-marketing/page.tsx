@@ -1,5 +1,16 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'WhatsApp Marketing | Kreative Catalyst',
+  description: 'Turn WhatsApp into a serious revenue channel. Real conversations, real leads, real sales. No spam, no guesswork — just results-driven WhatsApp marketing.',
+  openGraph: {
+    title: 'WhatsApp Marketing | Kreative Catalyst',
+    description: 'Turn WhatsApp into a revenue channel with real conversations, real leads, and real sales. No spam, no guesswork.',
+    url: 'https://kreativecatalyst.in/services/whatsapp-marketing',
+  },
+};
 
 const data: ServicePageData = {
   badge: 'WhatsApp Marketing',

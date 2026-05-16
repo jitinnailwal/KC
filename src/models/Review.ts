@@ -33,4 +33,6 @@ const ReviewSchema = new Schema<IReview>(
   }
 );
 
+ReviewSchema.index({ date: -1 });
+
 export default mongoose.models.Review || mongoose.model<IReview>('Review', ReviewSchema);

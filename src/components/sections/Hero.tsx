@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useEffect, useMemo, lazy, Suspense } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import MagneticButton from '@/components/ui/MagneticButton';
 
 type GSAPType = typeof import('gsap')['gsap'];
@@ -29,12 +28,34 @@ function CinematicText() {
     let cancelled = false;
     let currentRafId = 0;
     let gsapInstance: GSAPType;
+
+    // Mobile: simple CSS-only phrase cycling (no GSAP, no RAF)
+    if (isMobile) {
+      let phraseIdx = 0;
+      const cycle = () => {
+        if (cancelled) return;
+        container.textContent = subtextPhrases[phraseIdx];
+        container.style.opacity = '1';
+        container.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+          if (cancelled) return;
+          container.style.opacity = '0';
+          setTimeout(() => {
+            if (cancelled) return;
+            phraseIdx = (phraseIdx + 1) % subtextPhrases.length;
+            cycle();
+          }, 500);
+        }, 3500);
+      };
+      cycle();
+      return () => { cancelled = true; };
+    }
+
+    // Desktop: full GSAP cinematic text
     const handleMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
     };
-    if (!isMobile) {
-      window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    }
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     const runCycle = async () => {
       const { gsap } = await import('gsap');
@@ -66,96 +87,58 @@ function CinematicText() {
 
         // Set initial state
         wordEls.forEach((el) => {
-          gsap.set(el, {
-            opacity: 0,
-            y: 18,
-            ...(isMobile ? {} : { filter: 'blur(6px)' }),
-          });
+          gsap.set(el, { opacity: 0, y: 18 });
         });
 
         // Word-by-word reveal
         await new Promise<void>((resolve) => {
           if (cancelled) { resolve(); return; }
-          const tl = gsap.timeline({
-            onComplete: resolve,
+          const tl = gsap.timeline({ onComplete: resolve });
+          tl.to(wordEls, {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.12,
+            ease: 'power3.out',
           });
-
-          if (isMobile) {
-            // Mobile: simple opacity + y transform (no expensive blur/brightness filters)
-            tl.to(wordEls, {
-              opacity: 1,
-              y: 0,
-              duration: 0.5,
-              stagger: 0.08,
-              ease: 'power3.out',
-            });
-          } else {
-            tl.to(wordEls, {
-              opacity: 1,
-              y: 0,
-              filter: 'blur(0px)',
-              duration: 0.7,
-              stagger: 0.12,
-              ease: 'power3.out',
-            });
-
-            // Soft glow finish — brief brightness bump
-            tl.to(wordEls, {
-              filter: 'brightness(1.15) blur(0px)',
-              duration: 0.4,
-              ease: 'power2.out',
-            }, '-=0.2');
-            tl.to(wordEls, {
-              filter: 'brightness(1) blur(0px)',
-              duration: 0.6,
-              ease: 'power2.inOut',
-            });
-          }
         });
 
         if (cancelled) break;
 
-        // Enable idle effects (skip on mobile to save CPU)
+        // Enable idle effects
         idleReady.current = true;
 
-        if (!isMobile) {
-          const idleStart = performance.now();
+        const idleStart = performance.now();
+        const containerRect = container.getBoundingClientRect();
+        const containerCx = containerRect.left + containerRect.width / 2;
+        const containerCy = containerRect.top + containerRect.height / 2;
 
-          // Cache container center (avoid getBoundingClientRect every frame)
-          const containerRect = container.getBoundingClientRect();
-          const containerCx = containerRect.left + containerRect.width / 2;
-          const containerCy = containerRect.top + containerRect.height / 2;
-
-          // Start idle animation loop (desktop only)
-          const idleLoop = (now: number) => {
-            if (cancelled || !idleReady.current) return;
-            currentRafId = requestAnimationFrame(idleLoop);
-
-            const elapsed = now - idleStart;
-            const mx = mousePos.current.x;
-            const my = mousePos.current.y;
-
-            for (let i = 0; i < wordEls.length; i++) {
-              const el = wordEls[i];
-              // Subtle floating
-              const floatY = Math.sin(elapsed * 0.0015 + i * 0.6) * 1.2;
-              const floatX = Math.cos(elapsed * 0.001 + i * 0.5) * 0.4;
-
-              // Mouse parallax
-              let px = 0;
-              let py = 0;
-              if (mx > -9000) {
-                const dx = (mx - containerCx) * 0.008;
-                const dy = (my - containerCy) * 0.006;
-                px = dx * (1 + i * 0.15);
-                py = dy * (1 + i * 0.1);
-              }
-
-              el.style.transform = `translate3d(${floatX + px}px, ${floatY + py}px, 0)`;
-            }
-          };
+        const idleLoop = (now: number) => {
+          if (cancelled || !idleReady.current) return;
           currentRafId = requestAnimationFrame(idleLoop);
-        }
+
+          const elapsed = now - idleStart;
+          const mx = mousePos.current.x;
+          const my = mousePos.current.y;
+
+          for (let i = 0; i < wordEls.length; i++) {
+            const el = wordEls[i];
+            const floatY = Math.sin(elapsed * 0.0015 + i * 0.6) * 1.2;
+            const floatX = Math.cos(elapsed * 0.001 + i * 0.5) * 0.4;
+
+            let px = 0;
+            let py = 0;
+            if (mx > -9000) {
+              const dx = (mx - containerCx) * 0.008;
+              const dy = (my - containerCy) * 0.006;
+              px = dx * (1 + i * 0.15);
+              py = dy * (1 + i * 0.1);
+            }
+
+            el.style.transform = `translate3d(${floatX + px}px, ${floatY + py}px, 0)`;
+          }
+        };
+        currentRafId = requestAnimationFrame(idleLoop);
 
         // Hold for 3.5 seconds
         await new Promise<void>((resolve) => {
@@ -169,13 +152,12 @@ function CinematicText() {
         idleReady.current = false;
         cancelAnimationFrame(currentRafId);
 
-        // Cinematic fade-out
+        // Fade-out
         await new Promise<void>((resolve) => {
           if (cancelled) { resolve(); return; }
           gsap.to(wordEls, {
             opacity: 0,
             y: -12,
-            ...(isMobile ? {} : { filter: 'blur(4px)' }),
             duration: 0.5,
             stagger: 0.06,
             ease: 'power2.in',
@@ -185,7 +167,6 @@ function CinematicText() {
 
         if (cancelled) break;
 
-        // Next phrase
         phraseIdx = (phraseIdx + 1) % subtextPhrases.length;
       }
     };
@@ -236,20 +217,7 @@ export default function Hero() {
   const rafId = useRef(0);
   const isMobileRef = useRef(false);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end start'],
-  });
-
-  const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
-
-  const yRaw = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const opacityRaw = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const scaleRaw = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
-
-  const y = useSpring(yRaw, springConfig);
-  const opacity = useSpring(opacityRaw, springConfig);
-  const scale = useSpring(scaleRaw, springConfig);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const headlineLines = useMemo(
     () =>
@@ -285,70 +253,49 @@ export default function Hero() {
         const tl = gsap.timeline({ delay: isMobileRef.current ? 0.3 : 0.15 });
 
         if (isMobileRef.current) {
-          // Mobile: simple fade-in (no scatter, no blur filters)
+          // Mobile: pure CSS animations — no GSAP overhead at all
           charArray.forEach((el) => {
-            gsap.set(el, { opacity: 0, y: 20 });
+            el.style.opacity = '1';
           });
-
-          tl.to(charArray, {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            stagger: { each: 0.015, from: 'start' },
-            ease: 'power3.out',
-          });
+          // Reveal badge, subtext, CTA immediately via CSS
+          if (badgeRef.current) badgeRef.current.style.opacity = '1';
+          if (subtextRef.current) subtextRef.current.style.opacity = '1';
+          if (ctaRef.current) ctaRef.current.style.opacity = '1';
+          animReady.current = true;
+          return; // Skip entire GSAP timeline on mobile
         } else {
-          // Desktop: full scatter + settle + bounce
+          // Desktop: Characters start visible for LCP, then animate transform only
           charArray.forEach((el) => {
-            const randX = (Math.random() - 0.5) * window.innerWidth * 0.9;
-            const randY = (Math.random() - 0.5) * window.innerHeight * 0.8;
-            const randRotate = (Math.random() - 0.5) * 360;
-            const randScale = Math.random() * 0.4 + 0.2;
+            const randX = (Math.random() - 0.5) * 200;
+            const randY = (Math.random() - 0.5) * 100;
+            const randRotate = (Math.random() - 0.5) * 40;
 
             gsap.set(el, {
               x: randX,
               y: randY,
               rotation: randRotate,
-              scale: randScale,
-              opacity: 0,
-              filter: 'blur(8px)',
+              scale: 0.8,
             });
           });
 
-          // Phase 1: Characters fade in at scattered positions
+          // Characters settle into position
           tl.to(charArray, {
-            opacity: 0.4,
-            scale: 0.6,
-            filter: 'blur(4px)',
-            duration: 0.6,
+            x: 0,
+            y: 0,
+            rotation: 0,
+            scale: 1,
+            duration: 1.2,
             stagger: { each: 0.02, from: 'random' },
-            ease: 'power1.out',
+            ease: 'power4.out',
           });
 
-          // Phase 2: Characters drift toward their position
-          tl.to(
-            charArray,
-            {
-              x: 0,
-              y: 0,
-              rotation: 0,
-              scale: 1,
-              opacity: 1,
-              filter: 'blur(0px)',
-              duration: 1.4,
-              stagger: { each: 0.025, from: 'random' },
-              ease: 'power4.out',
-            },
-            '-=0.3'
-          );
-
-          // Phase 3: Subtle bounce/settle
+          // Subtle bounce/settle
           tl.fromTo(
             charArray,
             { y: 0 },
             {
-              y: -4,
-              duration: 0.15,
+              y: -3,
+              duration: 0.12,
               stagger: { each: 0.01, from: 'start' },
               ease: 'power2.out',
             },
@@ -356,43 +303,19 @@ export default function Hero() {
           );
           tl.to(charArray, {
             y: 0,
-            duration: 0.3,
+            duration: 0.25,
             stagger: { each: 0.01, from: 'start' },
             ease: 'bounce.out',
           });
         }
 
-        // Badge entrance
-        tl.fromTo(
-          badgeRef.current,
-          { opacity: 0, y: 20, scale: 0.9 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: 'power3.out' },
-          '-=0.6'
-        );
-
-        // Subtext — smooth fade in
-        tl.fromTo(
-          subtextRef.current,
-          { opacity: 0, y: 30, ...(isMobileRef.current ? {} : { filter: 'blur(4px)' }) },
-          { opacity: 1, y: 0, ...(isMobileRef.current ? {} : { filter: 'blur(0px)' }), duration: 1.2, ease: 'power3.out' },
-          '-=0.4'
-        );
-
-        // CTA buttons — smooth fade in
-        tl.fromTo(
-          ctaRef.current,
-          { opacity: 0, y: 30, ...(isMobileRef.current ? {} : { filter: 'blur(4px)' }) },
-          { opacity: 1, y: 0, ...(isMobileRef.current ? {} : { filter: 'blur(0px)' }), duration: 1.2, ease: 'power3.out' },
-          '-=0.8'
-        );
-
         // After GSAP completes, enable interactive effects
         tl.call(() => {
           charArray.forEach((el) => {
-            gsap.set(el, { clearProps: isMobileRef.current ? 'y' : 'x,y,rotation,scale,filter' });
+            gsap.set(el, { clearProps: isMobileRef.current ? 'y' : 'x,y,rotation,scale' });
             el.style.opacity = '1';
             if (!isMobileRef.current) {
-              el.style.transition = 'transform 0.25s ease-out, filter 0.6s ease-out';
+              el.style.transition = 'transform 0.25s ease-out';
             }
           });
 
@@ -534,6 +457,36 @@ export default function Hero() {
     };
   }, []);
 
+  // Lightweight scroll parallax (desktop only, replaces framer-motion useScroll)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
+    if (isMobile) return;
+
+    const content = contentRef.current;
+    const section = containerRef.current;
+    if (!content || !section) return;
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const rect = section.getBoundingClientRect();
+        const progress = Math.max(0, Math.min(1, -rect.top / rect.height));
+        const y = progress * 150;
+        const opacity = 1 - progress * 1.2;
+        const scale = 1 - progress * 0.1;
+        content.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`;
+        content.style.opacity = `${Math.max(0, opacity)}`;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <section
       ref={containerRef}
@@ -547,14 +500,14 @@ export default function Hero() {
       </Suspense>
 
       {/* Content */}
-      <motion.div
-        style={{ y, opacity, scale }}
+      <div
+        ref={contentRef}
         className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 text-center pt-20 sm:pt-16 md:pt-0"
       >
         {/* Badge */}
         <div
           ref={badgeRef}
-          className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full glass mb-6 sm:mb-8 opacity-0 max-w-[90vw]"
+          className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full glass mb-6 sm:mb-8 max-w-[90vw]"
         >
           <span className="w-2 h-2 rounded-full bg-accent-blue animate-pulse shrink-0" />
           <span className="text-[10px] sm:text-xs font-medium text-light-300 tracking-wider uppercase truncate">
@@ -593,7 +546,7 @@ export default function Hero() {
         {/* Sub text — Cinematic word-by-word reveal */}
         <div
           ref={subtextRef}
-          className="text-base sm:text-lg md:text-xl text-light-300 max-w-2xl mx-auto mb-12 opacity-0 min-h-[3.5em] sm:min-h-[3em] flex items-center justify-center hero-subtext-wrap hero-subtext-sweep"
+          className="text-base sm:text-lg md:text-xl text-light-300 max-w-2xl mx-auto mb-12 min-h-[3.5em] sm:min-h-[3em] flex items-center justify-center hero-subtext-wrap hero-subtext-sweep"
         >
           <CinematicText />
         </div>
@@ -601,7 +554,7 @@ export default function Hero() {
         {/* CTA Buttons */}
         <div
           ref={ctaRef}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <MagneticButton href="#contact">
             <span className="px-8 py-4 rounded-full bg-gradient-to-r from-accent-blue to-accent-gold text-dark-900 font-semibold text-base inline-block hover:shadow-xl hover:shadow-accent-blue/20 transition-shadow">
@@ -614,24 +567,17 @@ export default function Hero() {
             </span>
           </MagneticButton>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 4 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 z-10"
+      {/* Scroll indicator — CSS only */}
+      <div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 z-10 animate-fade-in-delayed"
       >
         <span className="text-xs text-light-300/50 tracking-widest uppercase">Scroll</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-5 h-8 rounded-full border border-light-300/20 flex items-start justify-center p-1"
-        >
-          <motion.div className="w-1 h-2 rounded-full bg-accent-blue" />
-        </motion.div>
-      </motion.div>
+        <div className="w-5 h-8 rounded-full border border-light-300/20 flex items-start justify-center p-1">
+          <div className="w-1 h-2 rounded-full bg-accent-blue animate-bounce-slow" />
+        </div>
+      </div>
     </section>
   );
 }

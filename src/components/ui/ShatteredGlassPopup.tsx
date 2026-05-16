@@ -1,7 +1,15 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { gsap } from 'gsap';
+
+type GSAPInstance = typeof import('gsap')['gsap'];
+let gsapCache: GSAPInstance | null = null;
+const getGsap = async (): Promise<GSAPInstance> => {
+  if (gsapCache) return gsapCache;
+  const { gsap } = await import('gsap');
+  gsapCache = gsap;
+  return gsap;
+};
 
 interface FormData {
   name: string;
@@ -53,9 +61,10 @@ function generateShards(count: number) {
 const SHARD_DATA = generateShards(24);
 
 // Lightweight confetti/spark celebration
-function spawnConfetti(container: HTMLElement) {
+async function spawnConfetti(container: HTMLElement) {
+  const gsap = await getGsap();
   const colors = ['#4F8CFF', '#C8A96A', '#FFFFFF', '#34D399', '#A78BFA'];
-  const count = 30;
+  const count = 20;
 
   for (let i = 0; i < count; i++) {
     const spark = document.createElement('div');
@@ -131,7 +140,7 @@ export default function ShatteredGlassPopup() {
       setIsOpen(true);
       setHasShown(true);
       sessionStorage.setItem('kc_popup', '1');
-    }, 4000);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [hasShown]);
 
@@ -143,64 +152,69 @@ export default function ShatteredGlassPopup() {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (prefersReduced) {
-      if (overlayRef.current) gsap.set(overlayRef.current, { opacity: 1 });
-      if (contentRef.current) gsap.set(contentRef.current, { opacity: 1, scale: 1 });
+      if (overlayRef.current) overlayRef.current.style.opacity = '1';
+      if (contentRef.current) { contentRef.current.style.opacity = '1'; contentRef.current.style.transform = 'scale(1)'; }
       setAnimating(false);
       setTimeout(() => firstInputRef.current?.focus(), 50);
       return;
     }
 
-    // Overlay
-    if (overlayRef.current) {
-      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
-    }
+    const runAnimation = async () => {
+      const gsap = await getGsap();
 
-    // Hide main content initially, show shards
-    if (contentRef.current) gsap.set(contentRef.current, { opacity: 0, scale: 0.95 });
-    if (shardsContainerRef.current) gsap.set(shardsContainerRef.current, { opacity: 1 });
+      // Overlay
+      if (overlayRef.current) {
+        gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+      }
 
-    // Animate shards assembling
-    const shardEls = shardsContainerRef.current?.children;
-    if (shardEls) {
-      const tl = gsap.timeline({
-        onComplete: () => {
-          // Crossfade: hide shards, show real content
-          if (shardsContainerRef.current) gsap.to(shardsContainerRef.current, { opacity: 0, duration: 0.15 });
-          if (contentRef.current) {
-            gsap.to(contentRef.current, { opacity: 1, scale: 1, duration: 0.25, ease: 'power2.out' });
-          }
-          setAnimating(false);
-          setTimeout(() => firstInputRef.current?.focus(), 100);
-        },
-      });
+      // Hide main content initially, show shards
+      if (contentRef.current) gsap.set(contentRef.current, { opacity: 0, scale: 0.95 });
+      if (shardsContainerRef.current) gsap.set(shardsContainerRef.current, { opacity: 1 });
 
-      Array.from(shardEls).forEach((shard) => {
-        const el = shard as HTMLElement;
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 300 + Math.random() * 400;
-        gsap.set(el, {
-          x: Math.cos(angle) * dist,
-          y: Math.sin(angle) * dist,
-          rotation: (Math.random() - 0.5) * 180,
-          scale: 0.05 + Math.random() * 0.1,
-          opacity: 0,
+      // Animate shards assembling
+      const shardEls = shardsContainerRef.current?.children;
+      if (shardEls) {
+        const tl = gsap.timeline({
+          onComplete: () => {
+            if (shardsContainerRef.current) gsap.to(shardsContainerRef.current, { opacity: 0, duration: 0.15 });
+            if (contentRef.current) {
+              gsap.to(contentRef.current, { opacity: 1, scale: 1, duration: 0.25, ease: 'power2.out' });
+            }
+            setAnimating(false);
+            setTimeout(() => firstInputRef.current?.focus(), 100);
+          },
         });
 
-        tl.to(
-          el,
-          {
-            x: 0,
-            y: 0,
-            rotation: 0,
-            scale: 1,
-            opacity: 1,
-            duration: 0.4 + Math.random() * 0.15,
-            ease: 'power3.out',
-          },
-          Math.random() * 0.12
-        );
-      });
-    }
+        Array.from(shardEls).forEach((shard) => {
+          const el = shard as HTMLElement;
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 300 + Math.random() * 400;
+          gsap.set(el, {
+            x: Math.cos(angle) * dist,
+            y: Math.sin(angle) * dist,
+            rotation: (Math.random() - 0.5) * 180,
+            scale: 0.05 + Math.random() * 0.1,
+            opacity: 0,
+          });
+
+          tl.to(
+            el,
+            {
+              x: 0,
+              y: 0,
+              rotation: 0,
+              scale: 1,
+              opacity: 1,
+              duration: 0.4 + Math.random() * 0.15,
+              ease: 'power3.out',
+            },
+            Math.random() * 0.12
+          );
+        });
+      }
+    };
+
+    runAnimation();
   }, [isOpen]);
 
   // ESC close
@@ -243,7 +257,7 @@ export default function ShatteredGlassPopup() {
     };
   }, [isOpen]);
 
-  const closeModal = useCallback(() => {
+  const closeModal = useCallback(async () => {
     if (animating) return;
     setAnimating(true);
 
@@ -255,18 +269,17 @@ export default function ShatteredGlassPopup() {
       return;
     }
 
-    // Fade content, show shards, shatter out
+    const gsap = await getGsap();
+
     if (contentRef.current) gsap.to(contentRef.current, { opacity: 0, scale: 0.95, duration: 0.15 });
     if (shardsContainerRef.current) gsap.set(shardsContainerRef.current, { opacity: 1 });
 
     const shardEls = shardsContainerRef.current?.children;
     if (shardEls) {
-      // Reset shards to assembled position first
       Array.from(shardEls).forEach((shard) => {
         gsap.set(shard, { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1 });
       });
 
-      // Shatter outward
       setTimeout(() => {
         Array.from(shardEls).forEach((shard) => {
           const angle = Math.random() * Math.PI * 2;
@@ -321,6 +334,7 @@ export default function ShatteredGlassPopup() {
       setIsOpen(false);
       setAnimating(false);
     } else {
+      const gsap = await getGsap();
       if (contentRef.current) gsap.to(contentRef.current, { opacity: 0, scale: 0.95, duration: 0.15 });
       if (shardsContainerRef.current) gsap.set(shardsContainerRef.current, { opacity: 1 });
 
@@ -362,8 +376,9 @@ export default function ShatteredGlassPopup() {
 
     // Show toast after modal closes
     setTimeout(
-      () => {
+      async () => {
         setToast({ ...submittedData, visible: true });
+        const gsap = await getGsap();
         requestAnimationFrame(() => {
           if (toastRef.current) {
             gsap.fromTo(

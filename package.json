@@ -10,7 +10,6 @@
     "seed": "npx tsx --env-file=.env.local scripts/seed.ts"
   },
   "dependencies": {
-    "@studio-freight/lenis": "^1.0.42",
     "cloudinary": "^2.10.0",
     "framer-motion": "^12.38.0",
     "gsap": "^3.15.0",
@@ -29,6 +28,7 @@
     "not dead"
   ],
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.6",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",
     "@types/react": "^18",

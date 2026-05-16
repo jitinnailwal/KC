@@ -1,5 +1,16 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Google Ads | Kreative Catalyst',
+  description: "Looking for instant results? Our Google Ads strategies boost traffic, leads, and sales faster than you can say 'Click-Through Rate.' Let's put your brand on top where it belongs.",
+  openGraph: {
+    title: 'Google Ads | Kreative Catalyst',
+    description: 'Google Ads strategies that boost traffic, leads, and sales. Put your brand on top where it belongs.',
+    url: 'https://kreativecatalyst.in/services/google-ads-services',
+  },
+};
 
 const data: ServicePageData = {
   badge: 'Google Ads Services',

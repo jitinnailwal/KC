@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 
 interface AnimatedTextProps {
   text: string;
@@ -10,50 +9,44 @@ interface AnimatedTextProps {
   once?: boolean;
 }
 
-export default function AnimatedText({ text, className = '', delay = 0, once = true }: AnimatedTextProps) {
-  const [isMobile, setIsMobile] = useState(false);
+export default function AnimatedText({ text, className = '', delay = 0 }: AnimatedTextProps) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setIsMobile(
-      window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window
-    );
-  }, []);
+    const el = ref.current;
+    if (!el) return;
 
-  // On mobile, render plain text to avoid per-word IntersectionObservers
-  if (isMobile) {
-    return <span className={`inline-block ${className}`}>{text}</span>;
-  }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '-50px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const words = text.split(' ');
 
   return (
-    <motion.span
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, margin: '-50px' }}
-      className={`inline-block ${className}`}
-    >
+    <span ref={ref} className={`inline-block ${className}`}>
       {words.map((word, i) => (
         <span key={i} className="inline-block overflow-hidden mr-[0.3em] py-[0.1em]">
-          <motion.span
-            className="inline-block"
-            variants={{
-              hidden: { y: '120%', rotate: 5 },
-              visible: {
-                y: 0,
-                rotate: 0,
-                transition: {
-                  duration: 0.6,
-                  delay: delay + i * 0.05,
-                  ease: [0.215, 0.61, 0.355, 1],
-                },
-              },
+          <span
+            className="inline-block transition-transform duration-500 ease-out"
+            style={{
+              transform: visible ? 'translateY(0) rotate(0deg)' : 'translateY(120%) rotate(5deg)',
+              transitionDelay: `${delay + i * 0.05}s`,
             }}
           >
             {word}
-          </motion.span>
+          </span>
         </span>
       ))}
-    </motion.span>
+    </span>
   );
 }

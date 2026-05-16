@@ -7,6 +7,10 @@ import Review from '@/models/Review';
 
 export const runtime = 'nodejs';
 
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+};
+
 // GET single review
 export async function GET(
   _request: NextRequest,
@@ -14,11 +18,11 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const review = await Review.findById(params.id);
+    const review = await Review.findById(params.id).lean();
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });
     }
-    return NextResponse.json(review);
+    return NextResponse.json(review, { headers: CACHE_HEADERS });
   } catch (error) {
     if (isMongoConnectionError(error)) {
       console.info('MongoDB unavailable for review lookup. Serving fallback JSON content.');
@@ -29,7 +33,7 @@ export async function GET(
       }
 
       return NextResponse.json(review, {
-        headers: { 'X-Data-Source': 'fallback-json' },
+        headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },
       });
     }
 

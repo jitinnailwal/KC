@@ -3,40 +3,32 @@ import { jsonError } from '@/lib/api-error';
 import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackBlogs } from '@/lib/fallback-content';
+import { generateSlug, estimateReadTime } from '@/lib/utils';
 import Blog from '@/models/Blog';
 
 export const runtime = 'nodejs';
 
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
-function estimateReadTime(content: string): string {
-  const words = content.trim().split(/\s+/).length;
-  const minutes = Math.max(1, Math.ceil(words / 200));
-  return `${minutes} min read`;
-}
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+};
 
 // GET all blogs
 export async function GET() {
   try {
     await dbConnect();
-    const blogs = await Blog.find().sort({ date: -1 });
+    const blogs = await Blog.find().sort({ date: -1 }).lean();
     if (blogs.length === 0) {
       return NextResponse.json(getFallbackBlogs(), {
-        headers: { 'X-Data-Source': 'fallback-json' },
+        headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },
       });
     }
-    return NextResponse.json(blogs);
+    return NextResponse.json(blogs, { headers: CACHE_HEADERS });
   } catch (error) {
     if (isMongoConnectionError(error)) {
       console.info('MongoDB unavailable for blog posts. Serving fallback JSON content.');
 
       return NextResponse.json(getFallbackBlogs(), {
-        headers: { 'X-Data-Source': 'fallback-json' },
+        headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },
       });
     }
 
@@ -55,6 +47,20 @@ export async function POST(request: NextRequest) {
     if (!body.title?.trim() || !body.content?.trim()) {
       return NextResponse.json(
         { error: 'Title and content are required' },
+        { status: 400 }
+      );
+    }
+
+    if (body.title.length > 500) {
+      return NextResponse.json(
+        { error: 'Title must be 500 characters or less' },
+        { status: 400 }
+      );
+    }
+
+    if (body.content.length > 100000) {
+      return NextResponse.json(
+        { error: 'Content must be 100,000 characters or less' },
         { status: 400 }
       );
     }

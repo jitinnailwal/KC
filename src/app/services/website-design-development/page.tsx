@@ -1,5 +1,16 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Website Design & Development | Kreative Catalyst',
+  description: 'We build high-converting, fast, mobile-friendly websites designed for business growth — Shopify stores, WordPress sites, landing pages, or complete ecommerce setups.',
+  openGraph: {
+    title: 'Website Design & Development | Kreative Catalyst',
+    description: 'High-converting, fast, mobile-friendly websites designed for business growth. Shopify, WordPress, landing pages, and ecommerce.',
+    url: 'https://kreativecatalyst.in/services/website-design-development',
+  },
+};
 
 const data: ServicePageData = {
   badge: 'Website Design & Development',

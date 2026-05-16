@@ -198,7 +198,7 @@ export default function Testimonials() {
   }, [testimonials]);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-dark-900">
+    <section ref={sectionRef} className="relative overflow-hidden bg-dark-900 z-[2] md:h-screen md:flex md:flex-col">
       {/* Background effects */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -209,7 +209,7 @@ export default function Testimonials() {
       />
 
       {/* Header */}
-      <div className="pt-16 md:pt-20 pb-4 px-4 sm:px-6 relative z-10">
+      <div className="pt-16 md:pt-12 pb-4 px-4 sm:px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
             <div>
@@ -253,7 +253,7 @@ export default function Testimonials() {
       {/* Desktop: Horizontal scrolling cards */}
       <div
         ref={cardsRef}
-        className="hidden md:flex gap-6 lg:gap-8 px-6 py-8 w-max"
+        className="hidden md:flex gap-6 lg:gap-8 px-6 py-4 w-max flex-1 items-center"
         style={{ willChange: 'transform' }}
       >
         {testimonials.map((testimonial, i) => (

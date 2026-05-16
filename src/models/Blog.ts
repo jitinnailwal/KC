@@ -39,4 +39,7 @@ const BlogSchema = new Schema<IBlog>(
   }
 );
 
+BlogSchema.index({ date: -1 });
+BlogSchema.index({ slug: 1 });
+
 export default mongoose.models.Blog || mongoose.model<IBlog>('Blog', BlogSchema);
