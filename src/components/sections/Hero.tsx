@@ -253,16 +253,40 @@ export default function Hero() {
         const tl = gsap.timeline({ delay: isMobileRef.current ? 0.3 : 0.15 });
 
         if (isMobileRef.current) {
-          // Mobile: pure CSS animations — no GSAP overhead at all
+          // Mobile: lightweight staggered fade-in + slide-up via GSAP (no interactive effects)
           charArray.forEach((el) => {
-            el.style.opacity = '1';
+            gsap.set(el, { opacity: 0, y: 20 });
           });
-          // Reveal badge, subtext, CTA immediately via CSS
-          if (badgeRef.current) badgeRef.current.style.opacity = '1';
-          if (subtextRef.current) subtextRef.current.style.opacity = '1';
-          if (ctaRef.current) ctaRef.current.style.opacity = '1';
-          animReady.current = true;
-          return; // Skip entire GSAP timeline on mobile
+          if (badgeRef.current) gsap.set(badgeRef.current, { opacity: 0, y: 15 });
+          if (subtextRef.current) gsap.set(subtextRef.current, { opacity: 0, y: 15 });
+          if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 0, y: 15 });
+
+          const mobileTl = gsap.timeline({ delay: 0.2 });
+
+          // Badge fades in first
+          if (badgeRef.current) {
+            mobileTl.to(badgeRef.current, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' });
+          }
+
+          // Characters fade in with stagger
+          mobileTl.to(charArray, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.015,
+            ease: 'power2.out',
+          }, '-=0.3');
+
+          // Subtext and CTA
+          if (subtextRef.current) {
+            mobileTl.to(subtextRef.current, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.2');
+          }
+          if (ctaRef.current) {
+            mobileTl.to(ctaRef.current, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }, '-=0.3');
+          }
+
+          mobileTl.call(() => { animReady.current = true; });
+          return; // Skip interactive effects on mobile
         } else {
           // Desktop: Characters start visible for LCP, then animate transform only
           charArray.forEach((el) => {
