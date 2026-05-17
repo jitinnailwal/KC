@@ -561,21 +561,21 @@ export default function Hero() {
               Book A Free Call
             </span>
           </MagneticButton>
+
+          {/* Scroll indicator — between CTA buttons */}
+          <div
+            className="hidden md:flex flex-col items-center gap-2 z-10 animate-fade-in-delayed"
+          >
+            <div className="w-5 h-8 rounded-full border border-light-300/20 flex items-start justify-center p-1">
+              <div className="w-1 h-2 rounded-full bg-accent-blue animate-bounce-slow" />
+            </div>
+          </div>
+
           <MagneticButton href="/services">
             <span className="px-8 py-4 rounded-full border border-light-300/20 text-light font-medium text-base inline-block hover:border-accent-blue/50 hover:bg-accent-blue/5 transition-all">
               Our Services
             </span>
           </MagneticButton>
-        </div>
-      </div>
-
-      {/* Scroll indicator — CSS only */}
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 z-10 animate-fade-in-delayed"
-      >
-        <span className="text-xs text-light-300/50 tracking-widest uppercase">Scroll</span>
-        <div className="w-5 h-8 rounded-full border border-light-300/20 flex items-start justify-center p-1">
-          <div className="w-1 h-2 rounded-full bg-accent-blue animate-bounce-slow" />
         </div>
       </div>
     </section>
