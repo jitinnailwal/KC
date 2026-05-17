@@ -276,10 +276,10 @@ export default function Testimonials() {
               Client Reviews
             </motion.span>
             <h2 className="font-heading font-bold text-3xl tracking-tight">
-              <AnimatedText text="What our clients" />
+              What our clients
               <br />
               <span className="text-gradient">
-                <AnimatedText text="say about us" delay={0.2} />
+                say about us
               </span>
             </h2>
           </div>

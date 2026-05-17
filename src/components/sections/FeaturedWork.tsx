@@ -230,10 +230,10 @@ export default function FeaturedWork() {
             Case Studies
           </motion.span>
           <h2 className="font-heading font-bold text-3xl tracking-tight">
-            <AnimatedText text="Results that" />
+            Results that
             <br />
             <span className="text-gradient">
-              <AnimatedText text="speak volumes" delay={0.2} />
+              speak volumes
             </span>
           </h2>
         </div>
@@ -251,6 +251,17 @@ export default function FeaturedWork() {
               </Link>
             </motion.div>
           ))}
+        </div>
+        <div className="text-center mt-8">
+          <Link
+            href="/case-studies"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-accent-blue/30 text-accent-blue text-sm font-medium hover:bg-accent-blue/5 transition-all duration-300"
+          >
+            View All Case Studies
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
       </div>
     </section>
