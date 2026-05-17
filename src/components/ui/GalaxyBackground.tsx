@@ -63,12 +63,7 @@ export default function GalaxyBackground() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // On mobile/touch: skip all canvas animation entirely for performance
     const isMobile = window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window;
-    if (isMobile) {
-      canvas.style.display = 'none';
-      return;
-    }
 
     const ctx = canvas.getContext('2d', { willReadFrequently: false });
     if (!ctx) return;
@@ -595,24 +590,8 @@ export default function GalaxyBackground() {
     <>
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full hidden md:block"
+        className="absolute inset-0 w-full h-full"
         style={{ zIndex: 0 }}
-      />
-      {/* Static CSS background for mobile — zero JS overhead */}
-      <div
-        className="absolute inset-0 w-full h-full md:hidden"
-        style={{
-          zIndex: 0,
-          background: 'radial-gradient(ellipse at center, rgba(15, 10, 40, 0.8) 0%, #050510 70%)',
-        }}
-      />
-      {/* Vignette for mobile */}
-      <div
-        className="absolute inset-0 w-full h-full pointer-events-none md:hidden"
-        style={{
-          zIndex: 0,
-          background: 'radial-gradient(ellipse at center, rgba(79,140,255,0.03) 0%, transparent 50%), radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.5) 100%)',
-        }}
       />
     </>
   );
