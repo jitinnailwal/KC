@@ -564,10 +564,10 @@ export default function Hero() {
 
           {/* Scroll indicator — between CTA buttons */}
           <div
-            className="hidden md:flex flex-col items-center gap-2 z-10 animate-fade-in-delayed"
+            className="hidden sm:flex flex-col items-center justify-center z-10 animate-fade-in-delayed mx-4"
           >
-            <div className="w-5 h-8 rounded-full border border-light-300/20 flex items-start justify-center p-1">
-              <div className="w-1 h-2 rounded-full bg-accent-blue animate-bounce-slow" />
+            <div className="w-6 h-10 rounded-full border-2 border-light-300/30 flex items-start justify-center pt-2">
+              <div className="w-1.5 h-2.5 rounded-full bg-accent-blue animate-bounce-slow" />
             </div>
           </div>
 
