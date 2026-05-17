@@ -142,10 +142,12 @@ export default function Services() {
             What We Do
           </motion.span>
           <h2 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight">
-            <AnimatedText text="Digital marketing" />
+            <span className="hidden md:inline"><AnimatedText text="Digital marketing" /></span>
+            <span className="md:hidden">Digital marketing</span>
             <br />
             <span className="text-gradient">
-              <AnimatedText text="that delivers results" delay={0.2} />
+              <span className="hidden md:inline"><AnimatedText text="that delivers results" delay={0.2} /></span>
+              <span className="md:hidden">that delivers results</span>
             </span>
           </h2>
         </div>
