@@ -17,17 +17,24 @@ export default function AnimatedText({ text, className = '', delay = 0 }: Animat
     const el = ref.current;
     if (!el) return;
 
+    // Fallback: ensure text becomes visible even if observer never fires
+    const fallbackTimer = setTimeout(() => setVisible(true), 1500);
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
           observer.disconnect();
+          clearTimeout(fallbackTimer);
         }
       },
-      { rootMargin: '0px', threshold: 0.1 }
+      { rootMargin: '50px', threshold: 0 }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const words = text.split(' ');
