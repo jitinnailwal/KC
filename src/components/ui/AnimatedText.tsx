@@ -42,11 +42,12 @@ export default function AnimatedText({ text, className = '', delay = 0 }: Animat
   return (
     <span ref={ref} className={`inline-block ${className}`}>
       {words.map((word, i) => (
-        <span key={i} className="inline-block overflow-hidden mr-[0.3em] py-[0.1em]">
+        <span key={i} className="inline-block mr-[0.3em]">
           <span
-            className="inline-block transition-transform duration-500 ease-out"
+            className="inline-block transition-all duration-500 ease-out"
             style={{
-              transform: visible ? 'translateY(0) rotate(0deg)' : 'translateY(120%) rotate(5deg)',
+              opacity: visible ? 1 : 0,
+              transform: visible ? 'translateY(0)' : 'translateY(20px)',
               transitionDelay: `${delay + i * 0.05}s`,
             }}
           >
