@@ -114,12 +114,15 @@ export default function About() {
               About Us
             </motion.span>
             <h2 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.1]">
-              <AnimatedText text="Your strategic" />
+              <span className="hidden md:inline"><AnimatedText text="Your strategic" /></span>
+              <span className="md:hidden">Your strategic</span>
               <br />
-              <AnimatedText text="digital marketing" delay={0.2} />
+              <span className="hidden md:inline"><AnimatedText text="digital marketing" delay={0.2} /></span>
+              <span className="md:hidden">digital marketing</span>
               <br />
               <span className="text-gradient">
-                <AnimatedText text="partner" delay={0.4} />
+                <span className="hidden md:inline"><AnimatedText text="partner" delay={0.4} /></span>
+                <span className="md:hidden">partner</span>
               </span>
             </h2>
           </div>

@@ -122,10 +122,12 @@ export default function Contact() {
             Get In Touch
           </motion.span>
           <h2 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight">
-            <AnimatedText text="Let's grow your" />
+            <span className="hidden md:inline"><AnimatedText text="Let's grow your" /></span>
+            <span className="md:hidden">Let&apos;s grow your</span>
             <br />
             <span className="text-gradient">
-              <AnimatedText text="business together" delay={0.2} />
+              <span className="hidden md:inline"><AnimatedText text="business together" delay={0.2} /></span>
+              <span className="md:hidden">business together</span>
             </span>
           </h2>
         </div>

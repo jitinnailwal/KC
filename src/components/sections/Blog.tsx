@@ -140,10 +140,12 @@ export default function Blog() {
               Our Blog
             </motion.span>
             <h2 className="font-heading font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              <AnimatedText text="Insights &" />
+              <span className="hidden md:inline"><AnimatedText text="Insights &" /></span>
+              <span className="md:hidden">Insights &</span>
               <br />
               <span className="text-gradient">
-                <AnimatedText text="perspectives" delay={0.2} />
+                <span className="hidden md:inline"><AnimatedText text="perspectives" delay={0.2} /></span>
+                <span className="md:hidden">perspectives</span>
               </span>
             </h2>
           </div>
