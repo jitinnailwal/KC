@@ -1,4 +1,8 @@
+import dns from 'dns';
 import mongoose from 'mongoose';
+
+// Fix Node.js DNS SRV resolution on Windows by using public DNS servers
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const SERVER_SELECTION_TIMEOUT_MS = Number.parseInt(

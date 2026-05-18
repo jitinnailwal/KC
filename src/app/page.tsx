@@ -2,17 +2,18 @@
 
 import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import Navbar from '@/components/layout/Navbar';
-import Hero from '@/components/sections/Hero';
+const Navbar = dynamic(() => import('@/components/layout/Navbar'), { ssr: false });
+const Hero = dynamic(() => import('@/components/sections/Hero'), { ssr: false });
 
-// Lazy load below-the-fold sections with next/dynamic for better code splitting
-const About = dynamic(() => import('@/components/sections/About'));
-const Services = dynamic(() => import('@/components/sections/Services'));
-const Testimonials = dynamic(() => import('@/components/sections/Testimonials'));
-const FeaturedWork = dynamic(() => import('@/components/sections/FeaturedWork'));
-const Blog = dynamic(() => import('@/components/sections/Blog'));
-const Contact = dynamic(() => import('@/components/sections/Contact'));
-const Footer = dynamic(() => import('@/components/layout/Footer'));
+// Lazy load below-the-fold sections with SSR disabled to prevent hydration mismatches
+// from framer-motion, GSAP, and browser-only APIs (matchMedia, IntersectionObserver)
+const About = dynamic(() => import('@/components/sections/About'), { ssr: false });
+const Services = dynamic(() => import('@/components/sections/Services'), { ssr: false });
+const Testimonials = dynamic(() => import('@/components/sections/Testimonials'), { ssr: false });
+const FeaturedWork = dynamic(() => import('@/components/sections/FeaturedWork'), { ssr: false });
+const Blog = dynamic(() => import('@/components/sections/Blog'), { ssr: false });
+const Contact = dynamic(() => import('@/components/sections/Contact'), { ssr: false });
+const Footer = dynamic(() => import('@/components/layout/Footer'), { ssr: false });
 const ShatteredGlassPopup = dynamic(() => import('@/components/ui/ShatteredGlassPopup'), { ssr: false });
 
 export default function Home() {
@@ -24,11 +25,13 @@ export default function Home() {
     const init = async () => {
       const { gsap } = await import('gsap');
       const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const { initSmoothScroll } = await import('@/lib/smooth-scroll');
 
       if (cleanedUp) return;
 
       gsap.registerPlugin(ScrollTrigger);
       ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
+      initSmoothScroll();
 
       timer = setTimeout(() => {
         ScrollTrigger.refresh();
@@ -43,6 +46,9 @@ export default function Home() {
       import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
         ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       });
+      import('@/lib/smooth-scroll').then(({ destroySmoothScroll }) => {
+        destroySmoothScroll();
+      });
     };
   }, []);
 
@@ -54,7 +60,6 @@ export default function Home() {
         <About />
         <Services />
         <Testimonials />
-        <div id="testimonials-spacer" className="hidden md:block bg-[#0a0a0a]" />
         <FeaturedWork />
         <Blog />
         <Contact />

@@ -3,6 +3,7 @@
 import Lenis from 'lenis';
 
 let lenisInstance: Lenis | null = null;
+let rafId: number | null = null;
 
 export function initSmoothScroll(): Lenis | null {
   if (lenisInstance) return lenisInstance;
@@ -18,26 +19,21 @@ export function initSmoothScroll(): Lenis | null {
     smoothWheel: true,
   });
 
-  // Connect Lenis to GSAP ScrollTrigger for seamless integration
-  import('gsap').then(({ gsap }) => {
-    import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
-      if (!lenisInstance) return;
+  function raf(time: number) {
+    lenisInstance?.raf(time);
+    rafId = requestAnimationFrame(raf);
+  }
 
-      // Lenis scroll events update ScrollTrigger
-      lenisInstance.on('scroll', ScrollTrigger.update);
-
-      // Use GSAP ticker to drive Lenis (syncs with GSAP animations)
-      gsap.ticker.add((time) => {
-        lenisInstance?.raf(time * 1000);
-      });
-      gsap.ticker.lagSmoothing(0);
-    });
-  });
+  rafId = requestAnimationFrame(raf);
 
   return lenisInstance;
 }
 
 export function destroySmoothScroll() {
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
   if (lenisInstance) {
     lenisInstance.destroy();
     lenisInstance = null;
