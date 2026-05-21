@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -8,6 +8,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
+import BookCallModal from '@/components/ui/BookCallModal';
 
 export interface ServiceOffering {
   title: string;
@@ -52,6 +53,7 @@ export interface ServicePageData {
 
 export default function ServicePageTemplate({ data }: { data: ServicePageData }) {
   const pageRef = useRef<HTMLDivElement>(null);
+  const [callModalOpen, setCallModalOpen] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -328,17 +330,18 @@ export default function ServicePageTemplate({ data }: { data: ServicePageData })
               {data.ctaTitle}
             </h2>
             <p className="text-light-300/60 mb-8">{data.ctaDescription}</p>
-            <a
-              href="/contact"
+            <button
+              onClick={() => setCallModalOpen(true)}
               className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-accent-blue to-accent-gold text-dark-900 font-semibold hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300"
               data-cursor="pointer"
             >
-              Get Started Today
-            </a>
+              Book a Call
+            </button>
           </motion.div>
         </section>
 
         <Footer />
+        <BookCallModal open={callModalOpen} onClose={() => setCallModalOpen(false)} />
       </div>
     </>
   );

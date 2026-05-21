@@ -8,6 +8,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
+import BookCallModal from '@/components/ui/BookCallModal';
 
 const coreValues = [
   {
@@ -202,6 +203,7 @@ function LocationsSection() {
 
 export default function AboutPage() {
   const pageRef = useRef<HTMLDivElement>(null);
+  const [callModalOpen, setCallModalOpen] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -437,18 +439,20 @@ export default function AboutPage() {
             <p className="text-light-300/60 mb-8">
               Our goal is to create impactful marketing solutions that align perfectly with your brand&apos;s vision and drive exceptional outcomes.
             </p>
-            <a
-              href="/#contact"
+            <button
+              onClick={() => setCallModalOpen(true)}
               className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-accent-blue to-accent-gold text-dark-900 font-semibold hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300"
               data-cursor="pointer"
             >
               Book A Free Call
-            </a>
+            </button>
           </motion.div>
         </section>
 
         <Footer />
       </div>
+
+      <BookCallModal open={callModalOpen} onClose={() => setCallModalOpen(false)} />
     </>
   );
 }
