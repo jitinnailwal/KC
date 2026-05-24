@@ -58,6 +58,9 @@ const footerLinks = {
     { name: 'Digital Marketing Agency in Delhi', href: '/locations/delhi' },
     { name: 'Digital Marketing Agency in Varanasi', href: '/locations/varanasi' },
     { name: 'Digital Marketing Agency in Bangalore', href: '/locations/bengaluru' },
+    { name: 'Digital Marketing Agency in UK', href: '/contact' },
+    { name: 'Digital Marketing Agency in USA', href: '/contact' },
+    { name: 'Digital Marketing Agency in UAE', href: '/contact' },
   ],
 };
 
@@ -110,7 +113,7 @@ export default function Footer() {
 
             {/* Locations */}
             <div className="flex gap-2 mt-4">
-              {['Delhi', 'Varanasi', 'Bangalore'].map((city) => (
+              {['Delhi', 'Varanasi', 'Bangalore', 'UK', 'USA', 'UAE'].map((city) => (
                 <span key={city} className="px-3 py-1 rounded-full text-xs text-light-300/80 border border-dark-700/50">
                   {city}
                 </span>

@@ -40,7 +40,7 @@ const contactInfo = [
   },
 ];
 
-const serviceAreas = ['Delhi', 'Varanasi', 'Bangalore'];
+const serviceAreas = ['Delhi', 'Varanasi', 'Bangalore', 'UK', 'USA', 'UAE'];
 
 export default function Contact() {
   const sectionRef = useRef<HTMLElement>(null);
