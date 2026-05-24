@@ -65,7 +65,7 @@ export default function Footer() {
   return (
     <footer className="relative pt-12 md:pt-20 pb-8 px-4 sm:px-6 border-t border-dark-700/30">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr] gap-8 sm:gap-10 mb-12 md:mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr] gap-6 sm:gap-8 md:gap-10 mb-12 md:mb-16">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
@@ -178,7 +178,7 @@ export default function Footer() {
           <p className="text-xs text-light-300/30">
             &copy; {new Date().getFullYear()} Kreative Catalyst. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             {/* Social icons row */}
             <div className="flex items-center gap-3">
               {socialLinks.map((link) => (

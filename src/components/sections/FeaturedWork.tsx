@@ -272,7 +272,7 @@ function ProjectCard({ study, index }: { study: CaseStudy; index: number }) {
   const colorScheme = cardColors[index % cardColors.length];
 
   return (
-    <div className="relative rounded-2xl overflow-hidden glass h-[45vh] md:h-[55vh] flex flex-col justify-end group">
+    <div className="relative rounded-2xl overflow-hidden glass h-[45vh] max-h-[400px] md:h-[55vh] md:max-h-none flex flex-col justify-end group">
       <div className={`absolute inset-0 bg-gradient-to-br ${colorScheme.color} opacity-30 group-hover:opacity-50 transition-opacity duration-700`} />
 
       <div className="absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-2">
@@ -280,7 +280,7 @@ function ProjectCard({ study, index }: { study: CaseStudy; index: number }) {
         <span className="text-xs text-light-300/40">{study.industry}</span>
       </div>
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-heading text-[100px] sm:text-[150px] md:text-[200px] font-bold text-white/[0.02] group-hover:text-white/[0.05] transition-colors duration-700 select-none">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-heading text-[80px] sm:text-[150px] md:text-[200px] font-bold text-white/[0.02] group-hover:text-white/[0.05] transition-colors duration-700 select-none">
         {String(index + 1).padStart(2, '0')}
       </div>
 

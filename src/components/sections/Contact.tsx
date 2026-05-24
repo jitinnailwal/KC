@@ -134,7 +134,7 @@ export default function Contact() {
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
           {/* Contact Info */}
-          <div>
+          <div className="pb-6 border-b border-dark-700/20 lg:pb-0 lg:border-b-0">
             <div className="contact-grid space-y-4 mb-8">
               {contactInfo.map((item) => (
                 <a

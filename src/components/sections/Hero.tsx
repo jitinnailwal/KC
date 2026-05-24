@@ -546,7 +546,7 @@ export default function Hero() {
           {headlineLines.map((line, lineIdx) => (
             <div key={lineIdx} className={`overflow-visible mb-1${line.className ? ' hero-gradient-line' : ''}`}>
               <h1
-                className="font-heading font-bold text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight leading-[1.05]"
+                className="font-heading font-bold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight leading-[1.05]"
               >
                 {line.words.map((wordObj, wordIdx) => (
                   <span key={wordIdx} className="inline-block whitespace-nowrap">

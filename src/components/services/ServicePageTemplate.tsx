@@ -197,7 +197,7 @@ export default function ServicePageTemplate({ data }: { data: ServicePageData })
               </h2>
             </div>
 
-            <div className="svc-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="svc-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {data.services.map((svc, i) => (
                 <div key={svc.title} className="svc-card">
                   <GlassCard className="p-6 h-full group hover:border-accent-blue/20 transition-all duration-300">
@@ -230,7 +230,7 @@ export default function ServicePageTemplate({ data }: { data: ServicePageData })
               </h2>
             </div>
 
-            <div className="why-grid grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <div className="why-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {data.whyChoose.map((item) => (
                 <div key={item.title} className="why-card">
                   <GlassCard className="p-6 h-full">
@@ -252,7 +252,7 @@ export default function ServicePageTemplate({ data }: { data: ServicePageData })
                 We&apos;ve Got Your Back, <span className="text-gradient">Every Step</span>
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {data.support.map((item) => (
                 <GlassCard key={item.title} className="p-6">
                   <h3 className="font-heading font-semibold text-lg mb-2">{item.title}</h3>

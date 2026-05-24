@@ -171,9 +171,9 @@ export default function About() {
 
         {/* Values infinite ticker */}
         <div className="overflow-hidden py-4">
-          <div ref={tickerRef} className="flex gap-8 w-max" style={{ willChange: 'transform' }}>
+          <div ref={tickerRef} className="flex gap-4 sm:gap-8 w-max" style={{ willChange: 'transform' }}>
             {[...values, ...values, ...values].map((value, i) => (
-              <div key={i} className="flex items-center gap-8 shrink-0">
+              <div key={i} className="flex items-center gap-4 sm:gap-8 shrink-0">
                 <span className="font-heading text-3xl sm:text-5xl md:text-7xl font-bold text-light-300/60 whitespace-nowrap">
                   {value}
                 </span>

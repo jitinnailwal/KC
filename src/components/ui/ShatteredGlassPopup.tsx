@@ -535,7 +535,7 @@ export default function ShatteredGlassPopup() {
       {toast.visible && (
         <div
           ref={toastRef}
-          className="fixed bottom-6 right-6 z-[9999] w-full max-w-sm rounded-xl border border-white/[0.08] bg-dark-800/95 p-5 shadow-2xl shadow-black/40"
+          className="fixed bottom-4 right-4 left-4 sm:left-auto sm:right-6 sm:bottom-6 z-[9999] w-auto sm:w-full sm:max-w-sm rounded-xl border border-white/[0.08] bg-dark-800/95 p-4 sm:p-5 shadow-2xl shadow-black/40"
           style={{ opacity: 0 }}
           role="alert"
           aria-live="polite"

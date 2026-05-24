@@ -184,7 +184,7 @@ export default function Services() {
                   </span>
                 </div>
 
-                <h3 className="font-heading font-semibold text-2xl mb-3 group-hover:text-gradient-white transition-colors">
+                <h3 className="font-heading font-semibold text-xl sm:text-2xl mb-3 group-hover:text-gradient-white transition-colors">
                   {service.title}
                 </h3>
                 <p className="text-light-300/60 leading-relaxed mb-3">
