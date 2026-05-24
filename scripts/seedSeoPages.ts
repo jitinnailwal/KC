@@ -6,7 +6,8 @@
  * Safe to run multiple times — uses upsert.
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 import dns from 'dns';
 import mongoose from 'mongoose';
 
