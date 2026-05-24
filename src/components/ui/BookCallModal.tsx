@@ -87,13 +87,13 @@ export default function BookCallModal({ open, onClose }: { open: boolean; onClos
             <form onSubmit={handleSubmit} className="space-y-4">
               <input type="text" placeholder="Your Name" required value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors" />
+                className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-700/50 text-base sm:text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors" />
               <input type="email" placeholder="Email Address" required value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors" />
+                className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-700/50 text-base sm:text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors" />
               <textarea placeholder="Your Query" rows={3} required value={formData.query}
                 onChange={(e) => setFormData({ ...formData, query: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors resize-none" />
+                className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-700/50 text-base sm:text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors resize-none" />
               <button type="submit" disabled={status === 'sending'}
                 className="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-accent-blue to-accent-gold text-dark-900 font-semibold text-sm hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300 disabled:opacity-50"
                 data-cursor="pointer">

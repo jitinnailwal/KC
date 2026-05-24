@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -9,6 +9,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AnimatedText from '@/components/ui/AnimatedText';
 import GlassCard from '@/components/ui/GlassCard';
+import BookCallModal from '@/components/ui/BookCallModal';
 
 const services = [
   {
@@ -117,6 +118,7 @@ const services = [
 
 export default function ServicesPage() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [callModalOpen, setCallModalOpen] = useState(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -240,18 +242,19 @@ export default function ServicesPage() {
             <p className="text-light-300/60 mb-8">
               Book a free consultation call and let&apos;s discuss how we can help you achieve your digital marketing goals.
             </p>
-            <a
-              href="/#contact"
+            <button
+              onClick={() => setCallModalOpen(true)}
               className="inline-block px-8 py-4 rounded-full bg-gradient-to-r from-accent-blue to-accent-gold text-dark-900 font-semibold hover:shadow-lg hover:shadow-accent-blue/20 transition-all duration-300"
               data-cursor="pointer"
             >
               Book A Free Call
-            </a>
+            </button>
           </motion.div>
         </section>
 
         <Footer />
       </div>
+      <BookCallModal open={callModalOpen} onClose={() => setCallModalOpen(false)} />
     </>
   );
 }

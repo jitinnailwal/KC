@@ -493,7 +493,7 @@ export default function ShatteredGlassPopup() {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/40 transition-colors"
+                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-base sm:text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/40 transition-colors"
                 />
                 <input
                   type="email"
@@ -501,21 +501,21 @@ export default function ShatteredGlassPopup() {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/40 transition-colors"
+                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-base sm:text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/40 transition-colors"
                 />
                 <input
                   type="tel"
                   placeholder="Phone Number"
                   value={formData.phone}
                   onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/40 transition-colors"
+                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-base sm:text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/40 transition-colors"
                 />
                 <textarea
                   placeholder="Tell us about your project..."
                   rows={3}
                   value={formData.message}
                   onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/40 transition-colors resize-none"
+                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-base sm:text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/40 transition-colors resize-none"
                 />
                 <button
                   ref={lastFocusableRef}
