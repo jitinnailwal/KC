@@ -1,8 +1,9 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
 import type { Metadata } from 'next';
+import { getSeoMeta } from '@/lib/getSeoMeta';
 
-export const metadata: Metadata = {
+const fallback: Metadata = {
   title: 'Google Ads | Kreative Catalyst',
   description: "Looking for instant results? Our Google Ads strategies boost traffic, leads, and sales faster than you can say 'Click-Through Rate.' Let's put your brand on top where it belongs.",
   openGraph: {
@@ -11,6 +12,11 @@ export const metadata: Metadata = {
     url: 'https://kreativecatalyst.in/services/google-ads-services',
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoMeta('/services/google-ads-services');
+  return seo.title ? seo : fallback;
+}
 
 const data: ServicePageData = {
   badge: 'Google Ads Services',

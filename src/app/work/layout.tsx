@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { getSeoMeta } from '@/lib/getSeoMeta';
 
-export const metadata: Metadata = {
+const fallback: Metadata = {
   title: 'Our Work | Kreative Catalyst',
   description: 'Explore our portfolio of successful digital marketing campaigns and web development projects.',
   openGraph: {
@@ -9,6 +10,11 @@ export const metadata: Metadata = {
     url: 'https://kreativecatalyst.in/work',
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoMeta('/work');
+  return seo.title ? seo : fallback;
+}
 
 export default function WorkLayout({ children }: { children: React.ReactNode }) {
   return children;

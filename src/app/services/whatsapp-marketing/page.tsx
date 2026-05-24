@@ -1,8 +1,9 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
 import type { Metadata } from 'next';
+import { getSeoMeta } from '@/lib/getSeoMeta';
 
-export const metadata: Metadata = {
+const fallback: Metadata = {
   title: 'WhatsApp Marketing | Kreative Catalyst',
   description: 'Turn WhatsApp into a serious revenue channel. Real conversations, real leads, real sales. No spam, no guesswork — just results-driven WhatsApp marketing.',
   openGraph: {
@@ -11,6 +12,11 @@ export const metadata: Metadata = {
     url: 'https://kreativecatalyst.in/services/whatsapp-marketing',
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoMeta('/services/whatsapp-marketing');
+  return seo.title ? seo : fallback;
+}
 
 const data: ServicePageData = {
   badge: 'WhatsApp Marketing',

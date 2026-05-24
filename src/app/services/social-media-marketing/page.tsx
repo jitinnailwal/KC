@@ -1,8 +1,9 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
 import type { Metadata } from 'next';
+import { getSeoMeta } from '@/lib/getSeoMeta';
 
-export const metadata: Metadata = {
+const fallback: Metadata = {
   title: 'Social Media Marketing | Kreative Catalyst',
   description: "Turn likes, shares, and hashtags into leads, sales, and success. Scroll-stopping content and ROI-driven campaigns that make your competition wish they'd hired us first.",
   openGraph: {
@@ -11,6 +12,11 @@ export const metadata: Metadata = {
     url: 'https://kreativecatalyst.in/services/social-media-marketing',
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoMeta('/services/social-media-marketing');
+  return seo.title ? seo : fallback;
+}
 
 const data: ServicePageData = {
   badge: 'Social Media Marketing',

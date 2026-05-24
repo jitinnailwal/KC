@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Blog', href: '/admin/blog' },
   { label: 'Reviews', href: '/admin/reviews' },
   { label: 'Case Studies', href: '/admin/case-studies' },
+  { label: 'SEO', href: '/admin/seo' },
 ];
 
 interface AdminLayoutProps {

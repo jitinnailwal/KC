@@ -1,8 +1,9 @@
 import ServicePageTemplate from '@/components/services/ServicePageTemplate';
 import type { ServicePageData } from '@/components/services/ServicePageTemplate';
 import type { Metadata } from 'next';
+import { getSeoMeta } from '@/lib/getSeoMeta';
 
-export const metadata: Metadata = {
+const fallback: Metadata = {
   title: 'Website Design & Development | Kreative Catalyst',
   description: 'We build high-converting, fast, mobile-friendly websites designed for business growth — Shopify stores, WordPress sites, landing pages, or complete ecommerce setups.',
   openGraph: {
@@ -11,6 +12,11 @@ export const metadata: Metadata = {
     url: 'https://kreativecatalyst.in/services/website-design-development',
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoMeta('/services/website-design-development');
+  return seo.title ? seo : fallback;
+}
 
 const data: ServicePageData = {
   badge: 'Website Design & Development',
