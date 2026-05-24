@@ -259,7 +259,7 @@ export default function AdminReviews() {
                       <div className="relative w-12 h-12 rounded-full overflow-hidden border border-dark-700/40">
                         <Image
                           src={form.image}
-                          alt="Client photo preview"
+                          alt={`Photo preview of ${form.name || 'client'}`}
                           fill
                           className="object-cover"
                         />

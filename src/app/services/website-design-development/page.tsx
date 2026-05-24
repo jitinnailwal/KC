@@ -19,13 +19,13 @@ const data: ServicePageData = {
   heroDescription: "A beautiful website means nothing without leads, sales, or trust. We build high-converting, fast, mobile-friendly websites designed for business growth — Shopify stores, WordPress sites, landing pages, or complete ecommerce setups.",
   whatIsTitle: 'What Is Website Design & Development?',
   whatIsContent: [
-    "Website design & development is the process of building an online presence that helps visitors trust your brand and take action. It includes UI/UX design, mobile-first layouts, speed optimization, and conversion-focused page structure.",
-    "We handle everything from Shopify and WordPress development to custom landing pages, ecommerce stores, lead generation forms, and technical SEO-ready development.",
+    "Website design & development is the process of building an online presence that helps visitors trust your brand and take action. It includes UI/UX design, mobile-first layouts, speed optimization, and conversion-focused page structure. Your website is the digital storefront of your business — it needs to load fast, look professional, and guide every visitor toward a clear next step.",
+    "We handle everything from Shopify and WordPress development to custom landing pages, ecommerce stores, lead generation forms, and technical SEO-ready development. Every website we build is optimized for Core Web Vitals, mobile responsiveness, and search engine visibility — ensuring your site not only looks great but also ranks well and converts visitors into paying customers.",
   ],
   whyNeededTitle: 'Why Do You Need It?',
   whyNeededContent: [
-    "Your website is your first impression. Slow loading, outdated design, or confusing navigation causes visitors to abandon your site within seconds.",
-    "A strong website builds trust, improves conversions, supports SEO, and enhances paid advertising performance by converting traffic into leads and customers.",
+    "Your website is your first impression. Slow loading, outdated design, or confusing navigation causes visitors to abandon your site within seconds. Studies show that 53% of mobile users leave a site that takes longer than 3 seconds to load — and they rarely come back. A professionally built website eliminates these friction points and keeps visitors engaged.",
+    "A strong website builds trust, improves conversions, supports SEO, and enhances paid advertising performance by converting traffic into leads and customers. Whether you're running Google Ads, social media campaigns, or relying on organic search, your website is where every marketing effort ultimately lands — making it the single most important asset in your digital marketing toolkit.",
   ],
   services: [
     { title: 'Shopify Development', description: "Built for ecommerce brands prioritizing clean design, performance, and conversions. New store setup, theme customization, product page optimization, and checkout flow improvements." },

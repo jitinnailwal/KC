@@ -19,13 +19,13 @@ const data: ServicePageData = {
   heroDescription: "Looking for instant results? Our Google Ads strategies boost traffic, leads, and sales faster than you can say 'Click-Through Rate.' Let's put your brand on top where it belongs.",
   whatIsTitle: 'What Are Google Ads?',
   whatIsContent: [
-    "Google Ads is your direct line to potential customers who are actively searching for your products or services. Think of it as the VIP lane to online visibility — you skip the wait and go straight to the top of search results.",
-    "With Google Ads, every click is a potential customer. We transform those clicks into conversions through strategic targeting, compelling ad copy, and continuous optimization.",
+    "Google Ads is your direct line to potential customers who are actively searching for your products or services. Think of it as the VIP lane to online visibility — you skip the wait and go straight to the top of search results. Whether through Search, Display, Shopping, or YouTube campaigns, Google Ads puts your business in front of high-intent audiences exactly when they're ready to take action.",
+    "With Google Ads, every click is a potential customer. We transform those clicks into conversions through strategic targeting, compelling ad copy, and continuous optimization. Our approach goes beyond basic campaign setup — we analyze search intent, refine audience segments, test ad variations, and optimize landing pages to ensure every rupee of your ad spend delivers maximum returns.",
   ],
   whyNeededTitle: 'Why Do You Need Google Ads?',
   whyNeededContent: [
-    "Google Ads is a result-driven advertising platform that targets specific audiences actively searching for what you offer. It's not about casting a wide net — it's about reaching the right people at the right moment.",
-    "While SEO builds long-term organic presence, Google Ads delivers immediate visibility and leads. The combination of both creates an unbeatable digital marketing strategy.",
+    "Google Ads is a result-driven advertising platform that targets specific audiences actively searching for what you offer. It's not about casting a wide net — it's about reaching the right people at the right moment. With billions of searches happening daily, your potential customers are already looking for solutions — Google Ads ensures they find you first.",
+    "While SEO builds long-term organic presence, Google Ads delivers immediate visibility and leads. The combination of both creates an unbeatable digital marketing strategy. From brand new businesses needing instant traction to established brands scaling their revenue, Google Ads provides the measurable, controllable growth engine that modern businesses need to stay competitive.",
   ],
   services: [
     { title: 'Search Ads', description: "We craft ads that pop up just when your audience is searching. Highly targeted, conversion-focused search campaigns that put you at the top." },

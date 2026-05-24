@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     const safePhone = phone ? sanitize(phone.trim()) : '';
     const safeMessage = message ? sanitize(message.trim()) : '';
 
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"Kreative Catalyst" <${process.env.SMTP_USER}>`,
       to: RECIPIENTS.join(', '),
       replyTo: email.trim(),
@@ -141,6 +141,7 @@ export async function POST(request: NextRequest) {
       `,
     });
 
+    console.log('Email sent successfully:', info.response);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Contact form error:', error);

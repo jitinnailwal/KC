@@ -19,13 +19,13 @@ const data: ServicePageData = {
   heroDescription: "Let's turn likes, shares, and hashtags into leads, sales, and success. Scroll-stopping content and ROI-driven campaigns that make your competition wish they'd hired us first.",
   whatIsTitle: 'What Is Social Media Marketing?',
   whatIsContent: [
-    "Social media marketing is your brand's megaphone — but way smarter. It involves crafted campaigns targeting audiences on the platforms where they spend hours every day.",
-    "SMM isn't about gaining followers for vanity metrics. It's about converting casual browsers into paying customers through strategic content, community building, and targeted advertising.",
+    "Social media marketing is your brand's megaphone — but way smarter. It involves crafted campaigns targeting audiences on the platforms where they spend hours every day. From Instagram Reels and Facebook campaigns to LinkedIn thought leadership and YouTube shorts, every piece of content is designed with a clear business objective in mind.",
+    "SMM isn't about gaining followers for vanity metrics. It's about converting casual browsers into paying customers through strategic content, community building, and targeted advertising. We combine organic content strategies with paid social campaigns to create a complete social presence that builds brand loyalty, drives website traffic, and generates measurable revenue for your business.",
   ],
   whyNeededTitle: 'Why Do You Need It?',
   whyNeededContent: [
-    "Social media is no longer optional — it's a mandatory business tool in today's market. Billions of potential customers are accessible through these platforms every single day.",
-    "The brands winning on social media are the ones having meaningful interactions and driving real business results, not just posting pretty pictures.",
+    "Social media is no longer optional — it's a mandatory business tool in today's market. Billions of potential customers are accessible through these platforms every single day. Your audience is already scrolling through feeds, watching stories, and engaging with content — the question is whether they're seeing your brand or your competitor's.",
+    "The brands winning on social media are the ones having meaningful interactions and driving real business results, not just posting pretty pictures. A well-executed social media strategy increases brand awareness, builds customer trust, drives direct sales through social commerce, and creates a community of loyal advocates who amplify your message organically.",
   ],
   services: [
     { title: 'Strategy Development', description: "Random posts are so 2010. We create cohesive strategies that make your brand message loud, clear, and irresistible across all platforms." },

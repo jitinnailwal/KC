@@ -239,7 +239,7 @@ export default function AdminBlog() {
                       <div className="relative w-20 h-12 rounded-md overflow-hidden border border-dark-700/40">
                         <Image
                           src={form.coverImage}
-                          alt="Cover preview"
+                          alt={`Cover image preview for ${form.title || 'blog post'}`}
                           fill
                           className="object-cover"
                         />
@@ -397,7 +397,7 @@ export default function AdminBlog() {
                       <div className="relative w-16 h-10 rounded-md overflow-hidden border border-dark-700/40 shrink-0">
                         <Image
                           src={blog.coverImage}
-                          alt=""
+                          alt={`Cover image for ${blog.title}`}
                           fill
                           className="object-cover"
                         />

@@ -29,7 +29,7 @@ const fallbackCaseStudies: CaseStudy[] = [
     industry: 'E-Commerce / Fashion',
     headline: 'From Zero to \u20B950 Lacs Revenue',
     description:
-      'We partnered with UT Sarees to build and scale their online presence from scratch. Through strategic Google Search and Shopping campaigns, we delivered exceptional results that transformed their business.',
+      'We partnered with UT Sarees to build and scale their online presence from scratch. Through strategic Google Search and Shopping campaigns combined with meticulous keyword targeting, we delivered exceptional results that transformed their business. Our team identified high-intent buyer keywords, optimized product feeds for Google Shopping, and continuously refined bidding strategies to maximize every rupee of ad spend.',
     results: [
       { metric: '\u20B950 Lacs', label: 'Revenue Generated' },
       { metric: '10X', label: 'Return on Ad Spend' },
@@ -45,7 +45,7 @@ const fallbackCaseStudies: CaseStudy[] = [
     industry: 'E-Commerce / Banarasi Silk',
     headline: 'First-Page Ranking for Competitive Keywords',
     description:
-      'The Usee Shop came to us struggling with visibility in a highly competitive niche. Our comprehensive SEO strategy achieved first-page ranking for "banarasi silk tissue saree" and drove significant organic sales growth.',
+      'The Usee Shop came to us struggling with visibility in a highly competitive niche. Our comprehensive SEO strategy achieved first-page ranking for "banarasi silk tissue saree" and drove significant organic sales growth. We conducted deep competitor analysis, restructured their website content around high-value keywords, built authoritative backlinks, and optimized their product pages for both search engines and conversions.',
     results: [
       { metric: '#1 Page', label: 'Google Ranking' },
       { metric: '300%+', label: 'Organic Traffic Growth' },
@@ -61,7 +61,7 @@ const fallbackCaseStudies: CaseStudy[] = [
     industry: 'E-Commerce',
     headline: '\u20B930 Lakh in Sales with 14X ROAS',
     description:
-      'Through precise website-ad alignment and continuous optimization, we helped this e-commerce brand achieve remarkable returns. Our approach combined landing page optimization with targeted ad campaigns for maximum conversion.',
+      'Through precise website-ad alignment and continuous optimization, we helped this e-commerce brand achieve remarkable returns. Our approach combined landing page optimization with targeted Meta ad campaigns for maximum conversion. By aligning the website experience with ad messaging, refining audience segments, and implementing systematic A/B testing, we reduced cost per acquisition by 60% while scaling total sales volume significantly.',
     results: [
       { metric: '\u20B930 Lakh', label: 'Total Sales' },
       { metric: '14X', label: 'Return on Ad Spend' },
@@ -143,10 +143,21 @@ export default function CaseStudiesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="text-light-300 text-lg max-w-2xl mx-auto"
+              className="text-light-300 text-lg max-w-2xl mx-auto mb-4"
             >
               Real campaigns. Real numbers. See how we&apos;ve helped businesses achieve
               extraordinary growth through strategic digital marketing.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="text-light-300/60 text-base max-w-2xl mx-auto"
+            >
+              Every case study below represents a real business that trusted Kreative Catalyst
+              to transform their digital presence. From e-commerce brands scaling revenue to
+              local businesses dominating search results, these stories showcase the measurable
+              impact of data-driven marketing strategies executed with precision and purpose.
             </motion.p>
           </div>
         </section>

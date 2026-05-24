@@ -9,7 +9,8 @@ const services = [
     number: '01',
     title: 'SEO Services',
     slug: 'seo-services',
-    description: 'Struggling to be seen online? We optimize your website with keyword research, technical SEO, and content strategies to rank higher.',
+    description: 'Struggling to be seen online? We optimize your website with keyword research, technical SEO, and content strategies to rank higher on Google.',
+    descriptionExtra: 'Our SEO approach is built around sustainable, white-hat practices that compound over time — driving consistent organic traffic and reducing your long-term dependency on paid ads.',
     tags: ['Keyword Research', 'Technical SEO', 'On-Page SEO', 'Link Building'],
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -22,7 +23,8 @@ const services = [
     number: '02',
     title: 'Social Media Marketing',
     slug: 'social-media-marketing',
-    description: 'Make your brand resonate in the social sphere. We craft engaging content and campaigns that build community and drive engagement.',
+    description: 'Make your brand resonate in the social sphere. We craft engaging content and campaigns that build community and drive real engagement.',
+    descriptionExtra: 'From Instagram reels to Facebook ad funnels, we create platform-specific strategies that turn followers into paying customers — with every post planned, designed, and optimized for results.',
     tags: ['Instagram', 'Facebook', 'LinkedIn', 'Content Strategy'],
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -35,6 +37,7 @@ const services = [
     title: 'Google Ads / PPC',
     slug: 'google-ads-ppc',
     description: 'Reach your ideal customers instantly. We manage high-ROI Google Search & Shopping campaigns that convert clicks into revenue.',
+    descriptionExtra: 'Every campaign is continuously tested and refined — from ad copy and bidding strategies to audience targeting — so every rupee of your budget works harder and delivers measurable returns.',
     tags: ['Search Ads', 'Shopping Ads', 'Display Ads', 'Remarketing'],
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -47,6 +50,7 @@ const services = [
     title: 'Content Marketing',
     slug: 'content-marketing',
     description: 'Content that drives traffic and leads. We create blogs, videos, and resources that position your brand as an industry authority.',
+    descriptionExtra: 'We align every piece of content with search intent and your sales funnel — so it attracts the right audience, builds trust, and moves them closer to becoming customers.',
     tags: ['Blog Writing', 'Video Content', 'Copywriting', 'Lead Magnets'],
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -60,6 +64,7 @@ const services = [
     title: 'WhatsApp Marketing',
     slug: 'whatsapp-marketing',
     description: 'Stop sending messages that get ignored. We design WhatsApp campaigns with personalized messaging that drives real conversations.',
+    descriptionExtra: 'From automated flows and broadcast campaigns to catalogue integrations and chatbots, we help you engage customers at scale while keeping every interaction personal and relevant.',
     tags: ['Broadcast Campaigns', 'Chatbots', 'Automation', 'Customer Engagement'],
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -72,6 +77,7 @@ const services = [
     title: 'Website Design & Dev',
     slug: 'website-development',
     description: 'Your website should sell, not just sit there. We build high-converting, fast, and beautiful websites tailored to your business.',
+    descriptionExtra: 'Every site is engineered for speed, SEO, and conversions from day one — whether it\'s a Shopify store, WordPress site, landing page, or a complete custom build with payment and analytics integration.',
     tags: ['Custom Design', 'E-Commerce', 'Landing Pages', 'CMS'],
     icon: (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -181,8 +187,11 @@ export default function Services() {
                 <h3 className="font-heading font-semibold text-2xl mb-3 group-hover:text-gradient-white transition-colors">
                   {service.title}
                 </h3>
-                <p className="text-light-300/60 leading-relaxed mb-6">
+                <p className="text-light-300/60 leading-relaxed mb-3">
                   {service.description}
+                </p>
+                <p className="text-light-300/60 leading-relaxed mb-6">
+                  {service.descriptionExtra}
                 </p>
 
                 <div className="flex flex-wrap gap-2">

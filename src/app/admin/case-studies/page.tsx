@@ -393,7 +393,7 @@ export default function AdminCaseStudies() {
                       <div className="relative w-20 h-12 rounded-md overflow-hidden border border-dark-700/40">
                         <Image
                           src={form.coverImage}
-                          alt="Cover preview"
+                          alt={`Cover image preview for ${form.client || 'case study'}`}
                           fill
                           className="object-cover"
                         />
@@ -509,7 +509,7 @@ export default function AdminCaseStudies() {
                       <div className="relative w-16 h-10 rounded-md overflow-hidden border border-dark-700/40 shrink-0">
                         <Image
                           src={cs.coverImage}
-                          alt=""
+                          alt={`Cover image for ${cs.client}`}
                           fill
                           className="object-cover"
                         />

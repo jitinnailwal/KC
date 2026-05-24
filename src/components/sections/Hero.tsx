@@ -1,7 +1,8 @@
 'use client';
 
-import { useRef, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useRef, useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import MagneticButton from '@/components/ui/MagneticButton';
+import BookCallModal from '@/components/ui/BookCallModal';
 
 type GSAPType = typeof import('gsap')['gsap'];
 
@@ -209,6 +210,7 @@ export default function Hero() {
   const badgeRef = useRef<HTMLDivElement>(null);
   const subtextRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const [callModalOpen, setCallModalOpen] = useState(false);
 
   // Refs for interactive effects (no re-renders)
   const mousePos = useRef({ x: -9999, y: -9999 });
@@ -580,7 +582,7 @@ export default function Hero() {
           ref={ctaRef}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <MagneticButton href="#contact">
+          <MagneticButton onClick={() => setCallModalOpen(true)}>
             <span className="px-8 py-4 rounded-full bg-gradient-to-r from-accent-blue to-accent-gold text-dark-900 font-semibold text-base inline-block hover:shadow-xl hover:shadow-accent-blue/20 transition-shadow">
               Book A Free Call
             </span>
@@ -602,6 +604,7 @@ export default function Hero() {
           </MagneticButton>
         </div>
       </div>
+      <BookCallModal open={callModalOpen} onClose={() => setCallModalOpen(false)} />
     </section>
   );
 }

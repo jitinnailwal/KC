@@ -25,8 +25,8 @@ const data: ServicePageData = {
   ],
   whyNeededTitle: 'Why Digital PR Actually Works',
   whyNeededContent: [
-    "People don't trust unknown brands easily anymore. Before making decisions, they search your business, check reviews, look for mentions, compare competitors, and judge credibility based on what they find online.",
-    "Digital PR helps shape that perception. With the right strategy, it improves online credibility, builds brand authority, strengthens SEO performance, increases branded search visibility, earns quality backlinks, and improves customer trust.",
+    "People don't trust unknown brands easily anymore. Before making decisions, they search your business, check reviews, look for mentions, compare competitors, and judge credibility based on what they find online. In a market flooded with options, the brands that appear in trusted publications and authoritative platforms are the ones that win customer confidence — and ultimately, their business.",
+    "Digital PR helps shape that perception. With the right strategy, it improves online credibility, builds brand authority, strengthens SEO performance, increases branded search visibility, earns quality backlinks, and improves customer trust. Unlike traditional advertising that interrupts audiences, Digital PR earns attention through genuine media coverage and thought leadership — creating lasting brand equity that paid campaigns simply cannot replicate.",
   ],
   services: [
     { title: 'Media Outreach', description: "We connect your business with relevant publications, blogs, and digital platforms to increase visibility and strengthen authority online." },

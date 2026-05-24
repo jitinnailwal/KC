@@ -19,13 +19,13 @@ const data: ServicePageData = {
   heroDescription: "We help your business rank higher on Google through proven SEO strategies. From keyword research to technical audits, we ensure your website attracts organic traffic that converts into leads and sales.",
   whatIsTitle: 'What is SEO?',
   whatIsContent: [
-    "SEO (Search Engine Optimization) transforms your website into a 24/7 salesperson through keyword optimization, technical foundations, and strategic approaches. Think of us as your website's personal coach ensuring dominance in Google rankings.",
-    "SEO is the connection between your website and search engines. It focuses on visibility, user-friendly content, organic traffic growth, domain authority improvement, and ultimately driving leads and sales.",
+    "SEO (Search Engine Optimization) transforms your website into a 24/7 salesperson through keyword optimization, technical foundations, and strategic approaches. Think of us as your website's personal coach ensuring dominance in Google rankings. Every page on your site becomes a potential entry point for customers who are actively searching for what you offer.",
+    "SEO is the connection between your website and search engines. It focuses on visibility, user-friendly content, organic traffic growth, domain authority improvement, and ultimately driving leads and sales. From on-page elements like meta tags and content structure to off-page factors like backlinks and brand signals, SEO covers the full spectrum of what makes a website authoritative in Google's eyes.",
   ],
   whyNeededTitle: 'Why Do You Need SEO?',
   whyNeededContent: [
-    "Your competitors are already investing in SEO. If you're not on page 1 of Google, you're invisible to 95% of potential customers searching for your services.",
-    "SEO delivers the highest ROI of any digital marketing channel. Unlike paid ads, organic rankings compound over time, providing sustainable growth without increasing ad spend.",
+    "Your competitors are already investing in SEO. If you're not on page 1 of Google, you're invisible to 95% of potential customers searching for your services. Every day without a solid SEO strategy means lost traffic, lost leads, and lost revenue going directly to competitors who rank above you.",
+    "SEO delivers the highest ROI of any digital marketing channel. Unlike paid ads, organic rankings compound over time, providing sustainable growth without increasing ad spend. A well-optimized page can generate leads for months or even years after publication, making SEO one of the most cost-effective long-term investments your business can make.",
   ],
   services: [
     { title: 'Keyword Research', description: "Identifying what your audience searches for when they need your products or services, then distributing keywords across your site for maximum visibility." },
