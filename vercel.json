@@ -1,0 +1,3 @@
+{
+  "buildCommand": "npx tsx scripts/seed.ts && npx tsx scripts/seedSeoPages.ts && next build"
+}
