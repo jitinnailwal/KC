@@ -156,7 +156,7 @@ export default function FeaturedWork() {
   }, [caseStudies]);
 
   return (
-    <section id="work" className="relative">
+    <section id="work" className="relative overflow-hidden">
       {/* Desktop: sticky horizontal scroll driven by Lenis */}
       <div
         ref={wrapperRef}

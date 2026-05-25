@@ -66,7 +66,7 @@ const footerLinks = {
 
 export default function Footer() {
   return (
-    <footer className="relative pt-12 md:pt-20 pb-8 px-4 sm:px-6 border-t border-dark-700/30">
+    <footer className="relative pt-12 md:pt-20 pb-8 px-4 sm:px-6 border-t border-dark-700/30 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr] gap-6 sm:gap-8 md:gap-10 mb-12 md:mb-16">
           {/* Brand */}
@@ -112,7 +112,7 @@ export default function Footer() {
             </div>
 
             {/* Locations */}
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4">
               {['Delhi', 'Varanasi', 'Bangalore', 'UK', 'USA', 'UAE'].map((city) => (
                 <span key={city} className="px-3 py-1 rounded-full text-xs text-light-300/80 border border-dark-700/50">
                   {city}

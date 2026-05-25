@@ -179,7 +179,7 @@ export default function Testimonials() {
   }, [testimonials]);
 
   return (
-    <section className="relative bg-dark-900">
+    <section className="relative bg-dark-900 overflow-hidden">
       {/* Desktop: sticky horizontal scroll driven by Lenis */}
       <div
         ref={wrapperRef}

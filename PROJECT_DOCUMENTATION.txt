@@ -1,0 +1,798 @@
+================================================================================
+            AI RESUME APP - COMPLETE PROJECT DOCUMENTATION
+================================================================================
+
+Generated: 2026-05-20
+
+================================================================================
+1. OVERALL PROJECT STRUCTURE
+================================================================================
+
+Directory Layout:
+-----------------
+AI RESUME APP/
+├── client/                    # React frontend (Vite)
+│   ├── src/
+│   │   ├── App.jsx           # Main app component with routing
+│   │   ├── main.jsx          # Entry point
+│   │   ├── index.css         # Global styles (light/dark theme)
+│   │   ├── components/       # Layout, Navbar, Sidebar, PrivateRoute
+│   │   ├── context/          # AuthContext, ThemeContext
+│   │   ├── pages/            # 10 page components
+│   │   ├── services/         # API client (Axios)
+│   │   └── assets/           # Images/assets
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── vercel.json           # Vercel deployment config
+│   └── index.html
+│
+├── server/                    # Express backend
+│   ├── config/
+│   │   └── db.js             # MongoDB connection (with DNS fix)
+│   ├── models/               # Mongoose schemas (User, Resume, Job)
+│   ├── routes/               # 6 API route files
+│   ├── controllers/          # 6 controller files
+│   ├── middleware/            # Auth, role, upload middleware
+│   ├── utils/
+│   │   ├── resumeParser.js   # ATS scoring engine + Gemini integration
+│   │   └── autoSeed.js       # Database seeding utility
+│   ├── uploads/              # Local file storage
+│   ├── server.js             # Express app configuration
+│   ├── seed.js               # Manual seeding script
+│   ├── package.json
+│   ├── vercel.json           # Vercel serverless config
+│   └── .env                  # Environment variables
+│
+└── README.md
+
+Tech Stack:
+-----------
+- Frontend:  React 19 + Vite, React Router v7, Axios, React Hot Toast, Google OAuth
+- Backend:   Node.js + Express, MongoDB Atlas, JWT, Multer, pdf-parse, Google Generative AI
+- AI:        Google Gemini 2.5 Flash
+- Database:  MongoDB Atlas (Mongoose ODM)
+- Deploy:    Vercel (both frontend and serverless backend)
+
+
+================================================================================
+2. ALL BACKEND API ROUTES
+================================================================================
+
+--------------------------------------------------------------------------
+2.1 AUTHENTICATION ROUTES  (prefix: /api/auth)
+    Files: server/routes/auth.js, server/controllers/authController.js
+--------------------------------------------------------------------------
+
+POST /api/auth/register
+  - Purpose: Register a new user
+  - Auth: None
+  - Body: { name, email, password, role?, company? }
+  - Validation: name required, email must be valid, password min 6 chars
+  - Response: { token, user: { _id, name, email, avatar, theme, role, ... } }
+
+POST /api/auth/login
+  - Purpose: Login with email and password
+  - Auth: None
+  - Body: { email, password, role? }
+  - Validation: email valid, password required
+  - Note: If role is provided, verifies user's role matches (prevents
+          employee logging into employer portal and vice versa)
+  - Response: { token, user: { ... } }
+
+POST /api/auth/google
+  - Purpose: Google OAuth login/registration
+  - Auth: None
+  - Body: { credential (Google ID token), role?, company? }
+  - Flow:
+    1. Verifies Google token with Google OAuth2Client
+    2. Extracts email, name, picture, googleId
+    3. If user exists: validates role, returns token
+    4. If new user without role: returns { newUser: true, email, name }
+       (frontend shows role picker)
+    5. If new user with role: creates user, returns token
+  - Response: { token, user: { ... } } OR { newUser: true, email, name }
+
+POST /api/auth/logout
+  - Purpose: Clear auth cookie
+  - Auth: None
+  - Response: { message: "Logged out successfully" }
+
+GET /api/auth/me
+  - Purpose: Get currently authenticated user
+  - Auth: Required (JWT)
+  - Response: { _id, name, email, avatar, theme, skills, bio, role, ... }
+
+
+--------------------------------------------------------------------------
+2.2 USER PROFILE ROUTES  (prefix: /api/user)
+    Files: server/routes/user.js, server/controllers/userController.js
+    All routes require authentication.
+--------------------------------------------------------------------------
+
+PUT /api/user/name
+  - Purpose: Update username
+  - Body: { name }
+  - Note: Users get only 2 name changes total (nameChangesLeft counter)
+  - Response: { user: { ... } }
+
+PUT /api/user/password
+  - Purpose: Change password
+  - Body: { oldPassword, newPassword }
+  - Validation: Both required, new password min 6 chars
+  - Response: { message: "Password updated successfully" }
+
+PUT /api/user/avatar
+  - Purpose: Upload profile picture
+  - Body: multipart/form-data with "avatar" field
+  - Limits: Max 2MB, formats: JPEG, JPG, PNG, WEBP
+  - Note: Old avatar file deleted from disk when new one uploaded
+  - Response: { user: { ... } }
+
+PUT /api/user/theme
+  - Purpose: Toggle light/dark theme
+  - Body: { theme } ("light" or "dark")
+  - Response: { user: { ... } }
+
+PUT /api/user/profile
+  - Purpose: Update bio and skills
+  - Body: { bio?, skills? }
+  - Validation: bio max 300 chars, skills is array of strings
+  - Response: { user: { ... } }
+
+
+--------------------------------------------------------------------------
+2.3 RESUME ROUTES  (prefix: /api/resumes)
+    Files: server/routes/resume.js, server/controllers/resumeController.js
+    All routes require authentication.
+--------------------------------------------------------------------------
+
+POST /api/resumes/upload
+  - Purpose: Upload and analyze a resume
+  - Body: multipart/form-data with "resume" field
+  - Limits: Max 5MB, formats: PDF, DOC, DOCX
+  - Flow:
+    1. File stored (disk locally, memory on Vercel)
+    2. PDF text extracted via Gemini API (with fallbacks)
+    3. ATS score calculated across 8 categories
+    4. Skills detected and categorized
+    5. Everything saved to MongoDB
+  - Response: { resume: { _id, fileName, score, skills, scoreBreakdown, ... } }
+
+GET /api/resumes
+  - Purpose: Get all resumes for current user
+  - Response: [{ _id, fileName, score, status, skills, createdAt, ... }, ...]
+
+GET /api/resumes/:id
+  - Purpose: Get single resume with full details
+  - Response: { _id, fileName, parsedText, score, scoreBreakdown, analysisMetadata, ... }
+
+GET /api/resumes/recommendations
+  - Purpose: Get job recommendations based on user's resume skills
+  - Response: [{ job, matchingSkills, matchPercentage }, ...]
+
+POST /api/resumes/:id/reanalyze
+  - Purpose: Re-analyze a single resume (recalculate ATS score)
+  - Note: On Vercel uses stored parsedText, locally re-parses file
+  - Response: { resume: { ... } }
+
+POST /api/resumes/reanalyze-all
+  - Purpose: Re-analyze all user resumes
+  - Response: { resumes: [{ ... }, ...] }
+
+DELETE /api/resumes/:id
+  - Purpose: Delete a resume
+  - Note: Also deletes file from disk (local only)
+  - Response: { message: "Resume deleted" }
+
+
+--------------------------------------------------------------------------
+2.4 JOB ROUTES  (prefix: /api/jobs)
+    Files: server/routes/job.js, server/controllers/jobController.js
+--------------------------------------------------------------------------
+
+GET /api/jobs
+  - Purpose: List all active jobs with search/filter/pagination
+  - Auth: None
+  - Query Params:
+    - search: text search on title, description, skills
+    - type: full-time | part-time | contract | internship
+    - location: regex case-insensitive match
+    - page: page number (default 1)
+    - limit: items per page (default 10)
+  - Response: { jobs: [...], page, totalPages, total }
+
+GET /api/jobs/:id
+  - Purpose: Get single job details
+  - Auth: None
+  - Response: { _id, title, company, location, type, mode, description,
+               requirements, skills, salary, postedBy, applicants, ... }
+
+POST /api/jobs
+  - Purpose: Create a new job listing
+  - Auth: Required (employer role)
+  - Body: { title, company, location, type, mode, description,
+            requirements, skills, salary }
+  - Response: { job: { ... } }
+
+PUT /api/jobs/:id
+  - Purpose: Update a job listing
+  - Auth: Required (must be the poster)
+  - Body: Same as create
+  - Response: { job: { ... } }
+
+DELETE /api/jobs/:id
+  - Purpose: Delete a job listing
+  - Auth: Required (must be the poster)
+  - Response: { message: "Job deleted" }
+
+POST /api/jobs/:id/apply
+  - Purpose: Apply to a job
+  - Auth: Required
+  - Note: Prevents duplicate applications
+  - Response: { message: "Applied successfully" }
+
+
+--------------------------------------------------------------------------
+2.5 ANALYTICS ROUTES  (prefix: /api/analytics)
+    Files: server/routes/analytics.js, server/controllers/analyticsController.js
+--------------------------------------------------------------------------
+
+GET /api/analytics/stats
+  - Purpose: Platform-wide statistics (public)
+  - Auth: None
+  - Response: { totalUsers, totalJobs, totalResumes }
+
+GET /api/analytics/dashboard
+  - Purpose: User's personal dashboard statistics
+  - Auth: Required
+  - Response: {
+      totalResumes, analyzedResumes, avgScore,
+      topSkills: [{ skill, count }],
+      appliedJobs, totalJobs,
+      recentResumes: [{ _id, fileName, score, status, createdAt, scoreBreakdown }]
+    }
+
+
+--------------------------------------------------------------------------
+2.6 EMPLOYER ROUTES  (prefix: /api/employer)
+    Files: server/routes/employer.js, server/controllers/employerController.js
+    All routes require authentication + employer role.
+--------------------------------------------------------------------------
+
+GET /api/employer/dashboard
+  - Purpose: Employer statistics and recent applicants
+  - Response: {
+      totalJobs, activeJobs, totalApplicants, pendingApplicants, acceptedApplicants,
+      recentApplicants: [{
+        user: { name, email, avatar },
+        status, appliedAt, jobTitle, jobId
+      }]
+    }
+
+GET /api/employer/jobs
+  - Purpose: All jobs posted by this employer
+  - Response: [{ _id, title, company, applicants, isActive, createdAt, ... }, ...]
+
+GET /api/employer/jobs/:jobId/applicants
+  - Purpose: View all applicants for a specific job
+  - Response: {
+      job: { _id, title, company, location },
+      applicants: [{
+        _id, user: { name, email, avatar, skills, bio },
+        status, appliedAt,
+        resume: { _id, fileName, score, skills, status, createdAt }
+      }]
+    }
+
+PUT /api/employer/jobs/:jobId/applicants/:applicantId
+  - Purpose: Accept or reject an applicant
+  - Body: { status: "accepted" | "rejected" }
+  - Response: { message, applicant }
+
+GET /api/employer/applicant/:userId/resume
+  - Purpose: View an applicant's resume(s)
+  - Response: [{ _id, fileName, score, skills, parsedText, createdAt, ... }]
+
+
+================================================================================
+3. GEMINI AI INTEGRATION
+================================================================================
+
+File: server/utils/resumeParser.js
+
+Setup:
+------
+  const { GoogleGenerativeAI } = require("@google/generative-ai");
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+Model Used: gemini-2.5-flash (fast, optimized for rapid processing)
+
+How Gemini is Used - PDF Text Extraction:
+-----------------------------------------
+Function: parsePDFGemini(buffer, retries = 2)
+
+1. PDF file buffer is converted to base64
+2. Sent to Gemini API as inline data with mimeType "application/pdf"
+3. Prompt sent to Gemini:
+
+   "Extract ALL text content from this resume PDF exactly as it appears.
+    Include every section, every detail - name, contact info, education,
+    experience, skills, projects, certifications, everything.
+    Return ONLY the extracted text, no commentary or formatting changes."
+
+4. Gemini returns plain text extraction of resume content
+5. If rate limited (429 error), retries with delays (10s, 20s)
+
+Fallback Strategy (if Gemini fails):
+-------------------------------------
+1. Try pdf-parse v1 (works on Vercel serverless - no native bindings)
+2. Try pdf-parse v2 (requires native bindings, better quality locally)
+3. Return null if all fail
+
+Integration with Resume Upload:
+-------------------------------
+1. PDF uploaded via multer
+2. Buffer sent to Gemini for text extraction
+3. Extracted text stored in database (parsedText field)
+4. Text immediately analyzed for ATS scoring
+5. On Vercel: Buffer used directly from memory
+6. Locally: File saved to disk, buffer read from file
+
+
+================================================================================
+4. RESUME STORAGE SYSTEM
+================================================================================
+
+4.1 Database Schema (Resume Model)
+-----------------------------------
+File: server/models/Resume.js
+
+{
+  user:              ObjectId (required, references User),
+  fileName:          String   (original upload filename),
+  filePath:          String   (storage path/name on server),
+  parsedText:        String   (full extracted text from PDF via Gemini),
+  skills:            [String] (detected skills list),
+  categorizedSkills: Map<String, [String]> (skills grouped by category),
+  score:             Number   (0-100, overall ATS score),
+  scoreBreakdown: {
+    sectionDetection:    { score: Number, max: 10 },
+    skillsMatching:      { score: Number, max: 25 },
+    experienceQuality:   { score: Number, max: 20 },
+    education:           { score: Number, max: 10 },
+    formattingStructure: { score: Number, max: 10 },
+    contactInformation:  { score: Number, max: 5 },
+    keywordRelevance:    { score: Number, max: 10 },
+    achievementsImpact:  { score: Number, max: 10 }
+  },
+  analysisMetadata: {
+    detectedSections:       [String],
+    yearsOfExperience:      Number,
+    highestDegree:          String,
+    totalWords:             Number,
+    totalLines:             Number,
+    bulletPoints:           Number,
+    actionVerbCount:        Number,
+    quantifiedAchievements: Number,
+    certificationCount:     Number,
+    hasEmail:               Boolean,
+    hasPhone:               Boolean,
+    hasLinkedIn:            Boolean,
+    hasGitHub:              Boolean,
+    hasPortfolio:           Boolean,
+    industryKeywordsFound:  Number,
+    stuffingPenalty:         Boolean,
+    leadershipIndicators:   Number
+  },
+  status: String (enum: "uploaded", "parsed", "analyzed"),
+  timestamps: true (createdAt, updatedAt)
+}
+
+4.2 File Storage
+-----------------
+LOCAL (Development):
+  - Path: server/uploads/resumes/resume-{userId}-{timestamp}.pdf
+  - On delete: file removed from disk
+  - Multer disk storage with unique filenames
+
+VERCEL (Production):
+  - Files stored in memory during processing only
+  - No persistent file storage (serverless limitation)
+  - filePath set to "memory-{userId}-{timestamp}.pdf"
+  - Uses buffer directly from request, not disk
+
+4.3 Resume Lifecycle
+---------------------
+  1. UPLOAD:     PDF received, stored with original filename
+  2. PARSING:    Gemini API extracts all text content
+  3. ANALYSIS:   ATS scoring calculated on extracted text (8 categories)
+  4. STORAGE:    All data (text, score, skills, metadata) saved to MongoDB
+  5. REANALYSIS: Uses stored parsedText on Vercel, re-parses file locally
+  6. DELETION:   File removed from disk (local), database record deleted
+
+
+================================================================================
+5. ATS SCORING ENGINE (How Resumes Are Analyzed)
+================================================================================
+
+File: server/utils/resumeParser.js
+
+Total Score: 100 points across 8 categories
+
+CATEGORY                  MAX PTS   WHAT IT CHECKS
+-----------               -------   ---------------
+Section Detection          10       Summary, Experience, Education, Skills,
+                                    Contact, Certifications, Projects
+
+Skills Matching            25       150+ recognized skills with aliases
+                                    (e.g., JS -> JavaScript, K8s -> Kubernetes)
+                                    Skills categorized into 9 groups
+
+Experience Quality         20       Action verbs (60+), quantified achievements,
+                                    years of experience, bullet point structure
+
+Education                  10       Degree level (PhD > Masters > Bachelors...),
+                                    relevant field, certifications count
+
+Formatting & Structure     10       Content length, section count, bullet points
+
+Contact Information         5       Email, phone, LinkedIn, GitHub/portfolio
+
+Keyword Relevance          10       23 industry keywords checked,
+                                    keyword stuffing penalty (-3 if >2% frequency)
+
+Achievements & Impact      10       Quantified results, leadership indicators,
+                                    project quality
+
+Skills Database:
+- 150+ skills across 9 categories
+- 200+ aliases for common abbreviations
+- Categories: Programming Languages, Frontend Frameworks, Backend Frameworks,
+              Web Technologies, Databases, Cloud & DevOps, Data & ML,
+              Tools & Practices, Mobile
+
+
+================================================================================
+6. AUTHENTICATION & SIGNUP/LOGIN SYSTEM
+================================================================================
+
+6.1 JWT Token System
+---------------------
+File: server/middleware/auth.js
+
+- Token Generation: jwt.sign({ id }, JWT_SECRET, { expiresIn: "70d" })
+- Token stored in:
+  a) httpOnly cookie (secure in production, sameSite: lax)
+  b) JSON response body (stored in localStorage by frontend)
+- On each request, token checked from:
+  a) Authorization: Bearer <token> header
+  b) Cookie
+
+6.2 Registration Flow
+----------------------
+1. User fills form: name, email, password, role (employee/employer)
+2. POST /api/auth/register
+3. Backend validates inputs (express-validator)
+4. Checks if email already exists
+5. Password hashed with bcryptjs (12 salt rounds)
+6. User document created in MongoDB
+7. JWT token generated
+8. Token set as cookie + returned in response
+9. Frontend stores token in localStorage
+10. User redirected to dashboard
+
+6.3 Login Flow (Email/Password)
+-------------------------------
+1. User enters email + password + selects role tab
+2. POST /api/auth/login with { email, password, role }
+3. Backend finds user by email
+4. Password verified with bcrypt.compare()
+5. If role provided, verifies user's role matches login portal
+   (prevents employee logging into employer portal)
+6. JWT token generated and returned
+7. Frontend stores token, redirects to appropriate dashboard
+
+6.4 Google OAuth Flow
+---------------------
+1. User clicks "Sign in with Google" button
+2. Google OAuth popup appears (via @react-oauth/google)
+3. Google returns ID token (credential)
+4. POST /api/auth/google with { credential, role?, company? }
+5. Backend verifies token with Google's OAuth2Client
+6. Extracts: email, name, picture, googleId (sub)
+7. Three scenarios:
+   a) User exists by googleId -> Login, return token
+   b) User exists by email -> Link googleId, login
+   c) New user WITHOUT role -> Return { newUser: true, email, name }
+      Frontend shows role selection dialog
+   d) New user WITH role -> Create account, return token
+
+6.5 Session Persistence
+------------------------
+- On app load, AuthContext calls GET /api/auth/me
+- Token sent from localStorage via Axios interceptor
+- If valid: user data loaded, app shows authenticated state
+- If invalid/expired: token cleared, redirect to login
+
+6.6 Logout
+-----------
+- POST /api/auth/logout clears cookie
+- Frontend removes token from localStorage
+- User state set to null
+- Redirect to home page
+
+6.7 Role-Based Access Control
+------------------------------
+File: server/middleware/role.js
+
+- requireRole(...roles) middleware function
+- Checks req.user.role against allowed roles
+- Returns 403 "Access denied" if unauthorized
+- Used on employer routes: requireRole("employer")
+
+6.8 Password Security
+----------------------
+- Hashed with bcryptjs, 12 salt rounds
+- Password field has select: false (excluded from queries by default)
+- Pre-save hook: only re-hashes if password was modified
+- Password change requires old password verification
+- Minimum 6 characters
+
+
+================================================================================
+7. DATABASE MODELS
+================================================================================
+
+7.1 User Model (server/models/User.js)
+---------------------------------------
+{
+  name:             String  (required, max 50, trimmed),
+  nameChangesLeft:  Number  (default 2),
+  email:            String  (required, unique, lowercase, validated),
+  googleId:         String  (unique, sparse index - for OAuth users),
+  password:         String  (min 6, hashed, select: false),
+  avatar:           String  (default "default-avatar.png"),
+  theme:            String  (enum: "light"|"dark", default "light"),
+  skills:           [String],
+  bio:              String  (max 300),
+  role:             String  (enum: "employee"|"employer", default "employee"),
+  company:          String  (max 100, for employers),
+  timestamps:       true
+}
+
+Methods:
+  - matchPassword(entered) -> Boolean (bcrypt compare)
+
+7.2 Resume Model (server/models/Resume.js)
+-------------------------------------------
+  [See Section 4.1 above for full schema]
+
+7.3 Job Model (server/models/Job.js)
+-------------------------------------
+{
+  title:        String   (required),
+  company:      String   (required),
+  location:     String   (required),
+  type:         String   (enum: "full-time"|"part-time"|"contract"|"internship"),
+  mode:         String   (enum: "remote"|"hybrid"|"on-site", default "remote"),
+  description:  String   (required),
+  requirements: [String],
+  skills:       [String],
+  salary: {
+    min:      Number,
+    max:      Number,
+    currency: String (default "INR")
+  },
+  postedBy:     ObjectId (ref: User),
+  applicants: [{
+    user:      ObjectId (ref: User),
+    status:    String (enum: "pending"|"accepted"|"rejected", default "pending"),
+    appliedAt: Date   (default: now)
+  }],
+  isActive:     Boolean (default true),
+  timestamps:   true
+}
+
+Index: Text index on title, description, skills (for search)
+
+
+================================================================================
+8. MIDDLEWARE
+================================================================================
+
+8.1 auth.js - JWT Authentication Middleware
+-------------------------------------------
+- Checks Authorization header (Bearer token) OR cookie
+- Verifies JWT signature with JWT_SECRET
+- Loads user from database by decoded ID
+- Sets req.user for downstream route handlers
+- Returns 401 if no token or invalid
+
+8.2 role.js - Role-Based Access Middleware
+-------------------------------------------
+- Factory: requireRole(...roles)
+- Checks req.user.role against allowed roles array
+- Returns 403 "Access denied" if role not in allowed list
+
+8.3 upload.js - File Upload Middleware (Multer)
+-----------------------------------------------
+Two upload handlers:
+
+uploadAvatar:
+  - Field name: "avatar"
+  - Max size: 2MB
+  - Allowed: JPEG, JPG, PNG, WEBP
+  - Storage: disk (local) or memory (Vercel)
+
+uploadResume:
+  - Field name: "resume"
+  - Max size: 5MB
+  - Allowed: PDF, DOC, DOCX
+  - Storage: disk (local) or memory (Vercel)
+
+Vercel detection: process.env.VERCEL === "1"
+
+
+================================================================================
+9. FRONTEND STRUCTURE
+================================================================================
+
+9.1 Routes (client/src/App.jsx)
+-------------------------------
+  /                              -> Home (public)
+  /login                         -> Login page (public)
+  /register                      -> Register page (public)
+  /jobs                          -> Job listings (public)
+  /dashboard                     -> Employee dashboard (protected)
+  /resumes                       -> Resume management (protected)
+  /profile                       -> User profile (protected)
+  /employer/dashboard            -> Employer dashboard (protected)
+  /employer/post-job             -> Create/edit job (protected)
+  /employer/jobs/:jobId/applicants -> View applicants (protected)
+
+9.2 Components (client/src/components/)
+---------------------------------------
+  Layout.jsx       - Wrapper with navbar & sidebar, renders <Outlet />
+  Navbar.jsx       - Header: branding, theme toggle, user menu
+  Sidebar.jsx      - Left navigation sidebar
+  PrivateRoute.jsx - Route guard: redirects to /login if not authenticated
+
+9.3 Context Providers
+---------------------
+  AuthContext (client/src/context/AuthContext.jsx):
+    - Manages: user state, loading, login/logout functions
+    - On mount: calls getMe() to restore session from stored token
+    - Exports: useAuth() hook
+
+  ThemeContext (client/src/context/ThemeContext.jsx):
+    - Manages: light/dark theme
+    - Syncs with user's saved theme from database
+    - Sets data-theme attribute on <html> element
+    - Persists to localStorage
+
+9.4 API Service Layer (client/src/services/api.js)
+---------------------------------------------------
+  Centralized Axios client:
+    - Base URL from VITE_API_URL environment variable
+    - Request interceptor: attaches JWT from localStorage
+    - withCredentials: true (for cookie support)
+
+  Exported functions:
+    Auth:     register, login, googleLogin, logout, getMe
+    User:     updateName, changePassword, uploadAvatar, toggleTheme, updateProfile
+    Resumes:  uploadResume, getResumes, getResume, deleteResume,
+              reanalyzeResume, reanalyzeAllResumes, getRecommendations
+    Jobs:     getJobs, getJob, applyJob, createJob, updateJob
+    Analytics: getDashboard, getStats
+    Employer: getEmployerDashboard, getEmployerJobs, getApplicants,
+              updateApplicantStatus, getApplicantResume
+
+9.5 Pages (10 Components)
+--------------------------
+  Home.jsx              - Landing page with features overview
+  Login.jsx             - Email/password + Google OAuth, employee/employer tabs
+  Register.jsx          - Sign up with role selection, Google OAuth
+  Dashboard.jsx         - Employee stats: resume scores, skill analysis
+  Resumes.jsx           - Upload, view, analyze, delete resumes
+  Profile.jsx           - Edit avatar, name, password, bio, skills
+  Jobs.jsx              - Browse/search/filter job listings
+  EmployerDashboard.jsx - Employer stats, recent applicants overview
+  PostJob.jsx           - Create/edit job listing form
+  Applicants.jsx        - View/manage applicants for a job
+
+
+================================================================================
+10. ENVIRONMENT VARIABLES
+================================================================================
+
+Server (.env):
+  MONGO_URI          - MongoDB Atlas connection string
+  GEMINI_API_KEY     - Google Generative AI API key
+  JWT_SECRET         - Secret key for signing JWT tokens
+  JWT_EXPIRE         - Token expiration time (e.g., "70d")
+  PORT               - Server port (default 5000)
+  CLIENT_URL         - Frontend URL for CORS configuration
+  GOOGLE_CLIENT_ID   - Google OAuth client ID
+  NODE_ENV           - Environment: "development" or "production"
+  VERCEL             - Auto-set on Vercel ("1"), used to detect serverless
+
+Client (.env):
+  VITE_GOOGLE_CLIENT_ID - Google OAuth client ID for frontend
+  VITE_API_URL          - Backend API base URL
+
+
+================================================================================
+11. PACKAGE DEPENDENCIES
+================================================================================
+
+Frontend (client/package.json):
+  @react-oauth/google  ^0.13.5   - Google OAuth component
+  axios                ^1.13.5   - HTTP client
+  react                ^19.2.0   - UI framework
+  react-dom            ^19.2.0   - DOM rendering
+  react-hot-toast      ^2.6.0    - Toast notifications
+  react-icons          ^5.5.0    - Icon library
+  react-router-dom     ^7.13.0   - Client-side routing
+
+Backend (server/package.json):
+  @google/generative-ai ^0.24.1  - Gemini API SDK
+  bcryptjs             ^3.0.3    - Password hashing
+  cookie-parser        ^1.4.7    - Cookie parsing middleware
+  cors                 ^2.8.6    - CORS middleware
+  dotenv               ^17.2.4   - Environment config loader
+  express              ^4.22.1   - Web framework
+  express-validator    ^7.3.1    - Request validation
+  google-auth-library  ^10.6.2   - Google OAuth token verification
+  jsonwebtoken         ^9.0.3    - JWT generation/verification
+  mongoose             ^9.1.6    - MongoDB ODM
+  multer               ^2.0.2    - File upload handling
+  pdf-parse            ^2.4.5    - PDF text extraction (v2)
+  pdf-parse-v1 (alias) ^1.1.1    - PDF text extraction (v1, serverless)
+
+
+================================================================================
+12. AUTO-SEEDING
+================================================================================
+
+File: server/utils/autoSeed.js
+
+- Runs automatically on first API request if no jobs exist in database
+- Creates a system user (system@airesumeapp.com) if not exists
+- Inserts 10 sample job listings:
+  1. Frontend Developer (React) - Bangalore - Full-time - Remote
+  2. Backend Developer (Node.js) - Mumbai - Full-time - Hybrid
+  3. Full Stack Developer - Delhi NCR - Full-time - On-site
+  4. Data Analyst - Hyderabad - Full-time - Remote
+  5. ML Engineer - Pune - Full-time - Hybrid
+  6. DevOps Engineer - Chennai - Full-time - Remote
+  7. React Native Developer - Bangalore - Contract - Remote
+  8. Software Engineering Intern - Mumbai - Internship - Hybrid
+  9. UI/UX Designer - Delhi NCR - Full-time - On-site
+  10. Python Backend Developer - Hyderabad - Full-time - Remote
+
+Each job includes: title, company, location, type, mode, description,
+requirements, skills, salary range (INR)
+
+
+================================================================================
+13. DEPLOYMENT CONFIGURATION
+================================================================================
+
+Client (vercel.json):
+  - SPA rewrite: all routes -> /index.html (for React Router)
+
+Server (vercel.json):
+  - Serverless function: server.js handles all /api/* routes
+  - Rewrite: all paths -> /server.js
+
+Key Serverless Adaptations:
+  - Multer uses memory storage on Vercel (no persistent disk)
+  - MongoDB connection cached across invocations
+  - DNS resolver set to Google DNS (8.8.8.8, 8.8.4.4)
+  - pdf-parse v1 used as primary fallback (no native bindings needed)
+
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================

@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(curl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(python3:*)",
+      "WebFetch(domain:kreativecatalyst.in)",
+      "Bash(node:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(gh auth:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(npx vercel:*)",
+      "Bash(npx next build:*)",
+      "Bash(git push:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(npx lighthouse:*)",
+      "Bash(taskkill:*)",
+      "Bash(npm start)",
+      "WebFetch(domain:localhost)",
+      "Bash(pkill:*)",
+      "Bash(wc:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(timeout 15 npx next dev:*)",
+      "Bash(npx npm-check-updates:*)",
+      "Bash(npm info:*)",
+      "Bash(npm install:*)",
+      "Bash(git pull:*)",
+      "Bash(git rebase:*)",
+      "Bash(gh api:*)",
+      "Bash(npm root:*)",
+      "Bash(nslookup:*)",
+      "Bash(git log:*)",
+      "Bash(printf:*)"
+    ]
+  }
+}
