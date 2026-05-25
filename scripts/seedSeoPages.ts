@@ -4,6 +4,7 @@
  * Usage:  npx tsx scripts/seedSeoPages.ts
  *
  * Safe to run multiple times — uses upsert.
+ * Also auto-registers SEO entries for existing blogs and case studies.
  */
 
 import dotenv from 'dotenv';
@@ -72,10 +73,49 @@ async function seed() {
     })
   );
 
+  // Collect all pages to seed (static + dynamic from existing content)
+  const allPages = [...pages];
+
+  // Auto-discover existing blog posts
+  try {
+    const Blog = mongoose.models.Blog || mongoose.model(
+      'Blog',
+      new mongoose.Schema({ title: String, slug: String, excerpt: String, published: Boolean })
+    );
+    const blogs = await Blog.find({ published: true }, 'title slug excerpt').lean();
+    for (const blog of blogs) {
+      allPages.push({
+        slug: `/blog/${blog.slug}`,
+        pageLabel: blog.title,
+      });
+    }
+    console.log(`Found ${blogs.length} published blog posts.`);
+  } catch {
+    console.log('Could not read blog posts (skipping).');
+  }
+
+  // Auto-discover existing case studies
+  try {
+    const CaseStudy = mongoose.models.CaseStudy || mongoose.model(
+      'CaseStudy',
+      new mongoose.Schema({ client: String, slug: String, headline: String, published: Boolean })
+    );
+    const studies = await CaseStudy.find({ published: true }, 'client slug headline').lean();
+    for (const study of studies) {
+      allPages.push({
+        slug: `/case-studies/${study.slug}`,
+        pageLabel: `${study.client} Case Study`,
+      });
+    }
+    console.log(`Found ${studies.length} published case studies.`);
+  } catch {
+    console.log('Could not read case studies (skipping).');
+  }
+
   let created = 0;
   let existing = 0;
 
-  for (const page of pages) {
+  for (const page of allPages) {
     const result = await SeoPage.updateOne(
       { slug: page.slug },
       { $setOnInsert: page },

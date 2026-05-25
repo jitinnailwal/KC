@@ -163,7 +163,7 @@ export default function FeaturedWork() {
   }, [caseStudies]);
 
   return (
-    <section id="work" className="relative bg-[#0a0a0a]">
+    <section id="work" className="relative bg-[#0a0a0a]" style={{ zIndex: 1 }}>
       {/* Desktop: GSAP ScrollTrigger pinned horizontal scroll */}
       <div
         ref={wrapperRef}

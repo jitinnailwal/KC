@@ -5,6 +5,7 @@ import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackCaseStudies } from '@/lib/fallback-content';
 import { generateSlug } from '@/lib/utils';
 import CaseStudy from '@/models/CaseStudy';
+import SeoPage from '@/models/SeoPage';
 
 export const runtime = 'nodejs';
 
@@ -68,6 +69,20 @@ export async function POST(request: NextRequest) {
       content: body.content || '',
       date: new Date().toISOString().split('T')[0],
     });
+
+    // Auto-register SEO page for this case study
+    await SeoPage.updateOne(
+      { slug: `/case-studies/${caseStudy.slug}` },
+      {
+        $setOnInsert: {
+          slug: `/case-studies/${caseStudy.slug}`,
+          pageLabel: `${body.client} Case Study`,
+          metaTitle: body.seoTitle || `${body.client} — ${body.headline} | Kreative Catalyst`,
+          metaDescription: body.seoDescription || body.description || '',
+        },
+      },
+      { upsert: true }
+    ).catch(() => {});
 
     return NextResponse.json(caseStudy, { status: 201 });
   } catch (error) {

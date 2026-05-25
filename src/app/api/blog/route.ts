@@ -5,6 +5,7 @@ import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackBlogs } from '@/lib/fallback-content';
 import { generateSlug, estimateReadTime } from '@/lib/utils';
 import Blog from '@/models/Blog';
+import SeoPage from '@/models/SeoPage';
 
 export const runtime = 'nodejs';
 
@@ -79,6 +80,20 @@ export async function POST(request: NextRequest) {
       published: body.published ?? true,
       coverImage: body.coverImage || '',
     });
+
+    // Auto-register SEO page for this blog post
+    await SeoPage.updateOne(
+      { slug: `/blog/${blog.slug}` },
+      {
+        $setOnInsert: {
+          slug: `/blog/${blog.slug}`,
+          pageLabel: blog.title,
+          metaTitle: `${blog.title} | Kreative Catalyst Blog`,
+          metaDescription: body.excerpt || '',
+        },
+      },
+      { upsert: true }
+    ).catch(() => {});
 
     return NextResponse.json(blog, { status: 201 });
   } catch (error) {

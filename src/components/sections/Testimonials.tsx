@@ -141,37 +141,39 @@ export default function Testimonials() {
       if (totalScroll <= 0) return;
 
       ctx = gsap.context(() => {
-        gsap.to(cards, {
-          x: -totalScroll,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: wrapper,
-            pin: true,
-            anticipatePin: 1,
-            scrub: 1,
-            start: 'top top',
-            end: () => `+=${totalScroll}`,
-            invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              // Progress bar
-              if (progressRef.current) {
-                progressRef.current.style.transform = `scaleX(${self.progress})`;
-              }
-              // Card reveal based on viewport position
-              const cardEls = cards.querySelectorAll('.testimonial-card');
-              cardEls.forEach((card) => {
-                const cardRect = card.getBoundingClientRect();
-                const cardCenter = cardRect.left + cardRect.width / 2;
-                const viewCenter = window.innerWidth * 0.7;
-                const dist = Math.abs(cardCenter - viewCenter) / window.innerWidth;
-                const opacity = Math.max(0.3, 1 - dist * 1.2);
-                const scale = Math.max(0.95, 1 - dist * 0.08);
-                (card as HTMLElement).style.opacity = String(opacity);
-                (card as HTMLElement).style.transform = `scale(${scale})`;
-              });
-            },
+        const st = ScrollTrigger.create({
+          trigger: wrapper,
+          pin: true,
+          anticipatePin: 1,
+          scrub: 1,
+          start: 'top top',
+          end: () => `+=${totalScroll}`,
+          invalidateOnRefresh: true,
+          animation: gsap.to(cards, { x: -totalScroll, ease: 'none' }),
+          onUpdate: (self) => {
+            // Progress bar
+            if (progressRef.current) {
+              progressRef.current.style.transform = `scaleX(${self.progress})`;
+            }
+            // Card reveal based on viewport position
+            const cardEls = cards.querySelectorAll('.testimonial-card');
+            cardEls.forEach((card) => {
+              const cardRect = card.getBoundingClientRect();
+              const cardCenter = cardRect.left + cardRect.width / 2;
+              const viewCenter = window.innerWidth * 0.7;
+              const dist = Math.abs(cardCenter - viewCenter) / window.innerWidth;
+              const opacity = Math.max(0.3, 1 - dist * 1.2);
+              const scale = Math.max(0.95, 1 - dist * 0.08);
+              (card as HTMLElement).style.opacity = String(opacity);
+              (card as HTMLElement).style.transform = `scale(${scale})`;
+            });
           },
         });
+
+        // Ensure pin spacer inherits z-index so it stacks above the next section
+        if (st.spacer) {
+          (st.spacer as HTMLElement).style.zIndex = '2';
+        }
       }, wrapper);
     };
 
@@ -184,7 +186,7 @@ export default function Testimonials() {
   }, [testimonials]);
 
   return (
-    <section className="relative bg-[#0a0a0a]">
+    <section className="relative bg-[#0a0a0a]" style={{ zIndex: 2 }}>
       {/* Desktop: GSAP ScrollTrigger pinned horizontal scroll */}
       <div
         ref={wrapperRef}

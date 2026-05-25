@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import dynamic from "next/dynamic";
+import { getSeoMeta } from "@/lib/getSeoMeta";
 import "./globals.css";
 
 const CustomCursor = dynamic(() => import("@/components/layout/CustomCursor"), { ssr: false });
@@ -26,7 +27,7 @@ export const viewport: Viewport = {
   themeColor: "#050510",
 };
 
-export const metadata: Metadata = {
+const fallbackMetadata: Metadata = {
   title: "Kreative Catalyst | Digital Marketing Agency",
   description: "Your Online Presence Deserves the Best. SEO, Social Media Marketing, Google Ads, Content Marketing, WhatsApp Marketing & Website Development.",
   metadataBase: new URL("https://kreativecatalyst.in"),
@@ -48,6 +49,14 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoMeta('/');
+  if (seo.title) {
+    return { ...fallbackMetadata, ...seo };
+  }
+  return fallbackMetadata;
+}
 
 const jsonLd = {
   '@context': 'https://schema.org',

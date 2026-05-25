@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getSeoMeta } from '@/lib/getSeoMeta';
 import CaseStudyDetailClient from './CaseStudyDetailClient';
 
 interface Props {
@@ -6,6 +7,11 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  // Check for admin-managed SEO overrides first
+  const seo = await getSeoMeta(`/case-studies/${params.slug}`);
+  if (seo.title) return seo;
+
+  // Fall back to generating metadata from case study content
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://kreativecatalyst.in';
     const res = await fetch(`${baseUrl}/api/case-studies`, { next: { revalidate: 60 } });
