@@ -46,7 +46,7 @@ export default function AdminBlog() {
 
   const fetchBlogs = useCallback(async () => {
     try {
-      const res = await fetch('/api/blog');
+      const res = await fetch('/api/blog', { cache: 'no-store' });
       const data = await fetchJson<BlogPost[]>(res);
       setBlogs(data);
       setError(null);

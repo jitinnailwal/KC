@@ -51,7 +51,7 @@ export default function AdminCaseStudies() {
 
   const fetchCaseStudies = useCallback(async () => {
     try {
-      const res = await fetch('/api/case-studies');
+      const res = await fetch('/api/case-studies', { cache: 'no-store' });
       const data = await fetchJson<CaseStudy[]>(res);
       setCaseStudies(data);
       setError(null);

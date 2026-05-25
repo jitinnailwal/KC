@@ -40,7 +40,7 @@ export default function AdminReviews() {
 
   const fetchReviews = useCallback(async () => {
     try {
-      const res = await fetch('/api/reviews');
+      const res = await fetch('/api/reviews', { cache: 'no-store' });
       const data = await fetchJson<Review[]>(res);
       setReviews(data);
       setError(null);
