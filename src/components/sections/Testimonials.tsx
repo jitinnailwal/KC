@@ -84,15 +84,15 @@ function getInitials(name: string) {
 }
 
 export default function Testimonials() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const [testimonials, setTestimonials] = useState<Review[]>(fallbackTestimonials);
 
-  // Defer API fetch until section is near viewport
+  // Fetch latest 7 reviews
   useEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
+    const section = sectionRef.current;
+    if (!section) return;
 
     let fetched = false;
     const observer = new IntersectionObserver(
@@ -105,26 +105,27 @@ export default function Testimonials() {
             .then((data: Review[]) => {
               const published = data.filter((r) => r.published);
               if (published.length > 0) {
-                setTestimonials(published);
+                setTestimonials(published.slice(0, 7));
               }
             })
             .catch(() => {});
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '400px' }
     );
-    observer.observe(wrapper);
+    observer.observe(section);
     return () => observer.disconnect();
   }, []);
 
   // GSAP ScrollTrigger horizontal scroll with pin
   useEffect(() => {
     const cards = cardsRef.current;
-    const wrapper = wrapperRef.current;
-    if (!cards || !wrapper) return;
+    const section = sectionRef.current;
+    if (!cards || !section) return;
     if (window.innerWidth < 768) return;
 
-    let ctx: ReturnType<typeof import('gsap')['gsap']['context']> | null = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let ctx: any = null;
     let cancelled = false;
 
     const init = async () => {
@@ -133,48 +134,51 @@ export default function Testimonials() {
       if (cancelled) return;
       gsap.registerPlugin(ScrollTrigger);
 
-      // Wait for DOM to render cards
-      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      // Single rAF for layout
+      await new Promise<void>((r) => requestAnimationFrame(() => r()));
       if (cancelled) return;
 
       const totalScroll = cards.scrollWidth - window.innerWidth;
       if (totalScroll <= 0) return;
 
+      // Reset cards to start position
+      gsap.set(cards, { x: 0 });
+
       ctx = gsap.context(() => {
-        const st = ScrollTrigger.create({
-          trigger: wrapper,
-          pin: true,
-          anticipatePin: 1,
-          scrub: 1,
-          start: 'top top',
-          end: () => `+=${totalScroll}`,
-          invalidateOnRefresh: true,
-          animation: gsap.to(cards, { x: -totalScroll, ease: 'none' }),
-          onUpdate: (self) => {
-            // Progress bar
-            if (progressRef.current) {
-              progressRef.current.style.transform = `scaleX(${self.progress})`;
-            }
-            // Card reveal based on viewport position
-            const cardEls = cards.querySelectorAll('.testimonial-card');
-            cardEls.forEach((card) => {
-              const cardRect = card.getBoundingClientRect();
-              const cardCenter = cardRect.left + cardRect.width / 2;
-              const viewCenter = window.innerWidth * 0.7;
-              const dist = Math.abs(cardCenter - viewCenter) / window.innerWidth;
-              const opacity = Math.max(0.3, 1 - dist * 1.2);
-              const scale = Math.max(0.95, 1 - dist * 0.08);
-              (card as HTMLElement).style.opacity = String(opacity);
-              (card as HTMLElement).style.transform = `scale(${scale})`;
-            });
+        gsap.to(cards, {
+          x: -totalScroll,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            pin: true,
+            scrub: 0.5,
+            start: 'top top',
+            end: () => `+=${totalScroll}`,
+            invalidateOnRefresh: true,
+            pinSpacing: true,
+            onUpdate: (self) => {
+              if (progressRef.current) {
+                progressRef.current.style.transform = `scaleX(${self.progress})`;
+              }
+              const cardEls = cards.querySelectorAll('.testimonial-card');
+              cardEls.forEach((card) => {
+                const cardRect = card.getBoundingClientRect();
+                const cardCenter = cardRect.left + cardRect.width / 2;
+                const viewCenter = window.innerWidth * 0.7;
+                const dist = Math.abs(cardCenter - viewCenter) / window.innerWidth;
+                const opacity = Math.max(0.3, 1 - dist * 1.2);
+                const scale = Math.max(0.95, 1 - dist * 0.08);
+                (card as HTMLElement).style.opacity = String(opacity);
+                (card as HTMLElement).style.transform = `scale(${scale})`;
+              });
+            },
           },
         });
+      }, section);
 
-        // Ensure pin spacer inherits z-index so it stacks above the next section
-        if (st.spacer) {
-          (st.spacer as HTMLElement).style.zIndex = '2';
-        }
-      }, wrapper);
+      // Recalculate all triggers after creation
+      ScrollTrigger.sort();
+      ScrollTrigger.refresh();
     };
 
     init();
@@ -186,12 +190,9 @@ export default function Testimonials() {
   }, [testimonials]);
 
   return (
-    <section className="relative bg-[#0a0a0a]" style={{ zIndex: 2 }}>
-      {/* Desktop: GSAP ScrollTrigger pinned horizontal scroll */}
-      <div
-        ref={wrapperRef}
-        className="hidden md:block h-screen overflow-hidden bg-[#0a0a0a]"
-      >
+    <section ref={sectionRef} className="relative bg-[#0a0a0a]" style={{ zIndex: 2 }}>
+      {/* Desktop: pinned horizontal scroll */}
+      <div className="hidden md:block h-screen overflow-hidden bg-[#0a0a0a]">
         {/* Background effects */}
         <div
           className="absolute inset-0 pointer-events-none"

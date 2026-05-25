@@ -76,17 +76,18 @@ const cardColors = [
 ];
 
 export default function FeaturedWork() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>(fallbackCaseStudies);
 
+  // Fetch latest 5 case studies
   useEffect(() => {
     const doFetch = () => {
       fetch('/api/case-studies')
         .then((res) => res.json())
         .then((data: CaseStudy[]) => {
           const published = data.filter((cs) => cs.published);
-          if (published.length > 0) setCaseStudies(published);
+          if (published.length > 0) setCaseStudies(published.slice(0, 5));
         })
         .catch(() => {});
     };
@@ -103,11 +104,12 @@ export default function FeaturedWork() {
   // GSAP ScrollTrigger horizontal scroll with pin
   useEffect(() => {
     const cards = cardsRef.current;
-    const wrapper = wrapperRef.current;
-    if (!cards || !wrapper) return;
+    const section = sectionRef.current;
+    if (!cards || !section) return;
     if (window.innerWidth < 768) return;
 
-    let ctx: ReturnType<typeof import('gsap')['gsap']['context']> | null = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let ctx: any = null;
     let cancelled = false;
 
     const init = async () => {
@@ -116,27 +118,29 @@ export default function FeaturedWork() {
       if (cancelled) return;
       gsap.registerPlugin(ScrollTrigger);
 
-      // Wait for DOM to render cards
-      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      // Single rAF for layout
+      await new Promise<void>((r) => requestAnimationFrame(() => r()));
       if (cancelled) return;
 
       const totalScroll = cards.scrollWidth - window.innerWidth;
       if (totalScroll <= 0) return;
+
+      // Reset cards to start position
+      gsap.set(cards, { x: 0 });
 
       ctx = gsap.context(() => {
         gsap.to(cards, {
           x: -totalScroll,
           ease: 'none',
           scrollTrigger: {
-            trigger: wrapper,
+            trigger: section,
             pin: true,
-            anticipatePin: 1,
-            scrub: 1,
+            scrub: 0.5,
             start: 'top top',
             end: () => `+=${totalScroll}`,
             invalidateOnRefresh: true,
+            pinSpacing: true,
             onUpdate: () => {
-              // Card reveal based on viewport position
               const cardEls = cards.querySelectorAll('.project-card');
               cardEls.forEach((card) => {
                 const cardRect = card.getBoundingClientRect();
@@ -151,7 +155,11 @@ export default function FeaturedWork() {
             },
           },
         });
-      }, wrapper);
+      }, section);
+
+      // Recalculate all triggers after creation
+      ScrollTrigger.sort();
+      ScrollTrigger.refresh();
     };
 
     init();
@@ -163,12 +171,9 @@ export default function FeaturedWork() {
   }, [caseStudies]);
 
   return (
-    <section id="work" className="relative bg-[#0a0a0a]" style={{ zIndex: 1 }}>
-      {/* Desktop: GSAP ScrollTrigger pinned horizontal scroll */}
-      <div
-        ref={wrapperRef}
-        className="hidden md:block h-screen overflow-hidden bg-[#0a0a0a]"
-      >
+    <section ref={sectionRef} id="work" className="relative bg-[#0a0a0a]" style={{ zIndex: 1 }}>
+      {/* Desktop: pinned horizontal scroll */}
+      <div className="hidden md:block h-screen overflow-hidden bg-[#0a0a0a]">
         {/* Header */}
         <div className="pt-16 md:pt-20 pb-4 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto">

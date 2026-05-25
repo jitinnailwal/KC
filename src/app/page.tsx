@@ -33,9 +33,11 @@ export default function Home() {
       ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
       initSmoothScroll();
 
+      // Refresh after all sections have initialized their ScrollTriggers
       timer = setTimeout(() => {
-        ScrollTrigger.refresh();
-      }, 1000);
+        ScrollTrigger.sort();
+        ScrollTrigger.refresh(true);
+      }, 1500);
     };
 
     init();
