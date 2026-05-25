@@ -79,7 +79,6 @@ export default function FeaturedWork() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>(fallbackCaseStudies);
-  const scrollDistanceRef = useRef(0);
 
   useEffect(() => {
     const doFetch = () => {
@@ -101,125 +100,126 @@ export default function FeaturedWork() {
     }
   }, []);
 
-  // Calculate scroll distance and connect Lenis
+  // GSAP ScrollTrigger horizontal scroll with pin
   useEffect(() => {
     const cards = cardsRef.current;
     const wrapper = wrapperRef.current;
     if (!cards || !wrapper) return;
+    if (window.innerWidth < 768) return;
 
-    const calculate = () => {
-      const dist = cards.scrollWidth - window.innerWidth;
-      scrollDistanceRef.current = Math.max(0, dist);
-      wrapper.style.height = scrollDistanceRef.current > 0
-        ? `${window.innerHeight + scrollDistanceRef.current}px`
-        : '100vh';
+    let ctx: ReturnType<typeof import('gsap')['gsap']['context']> | null = null;
+    let cancelled = false;
+
+    const init = async () => {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Wait for DOM to render cards
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      if (cancelled) return;
+
+      const totalScroll = cards.scrollWidth - window.innerWidth;
+      if (totalScroll <= 0) return;
+
+      ctx = gsap.context(() => {
+        gsap.to(cards, {
+          x: -totalScroll,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrapper,
+            pin: true,
+            anticipatePin: 1,
+            scrub: 1,
+            start: 'top top',
+            end: () => `+=${totalScroll}`,
+            invalidateOnRefresh: true,
+            onUpdate: () => {
+              // Card reveal based on viewport position
+              const cardEls = cards.querySelectorAll('.project-card');
+              cardEls.forEach((card) => {
+                const cardRect = card.getBoundingClientRect();
+                const cardCenter = cardRect.left + cardRect.width / 2;
+                const viewCenter = window.innerWidth * 0.6;
+                const dist = Math.abs(cardCenter - viewCenter) / window.innerWidth;
+                const opacity = Math.max(0.4, 1 - dist);
+                const translateY = Math.max(0, dist * 40);
+                (card as HTMLElement).style.opacity = String(opacity);
+                (card as HTMLElement).style.transform = `translateY(${translateY}px)`;
+              });
+            },
+          },
+        });
+      }, wrapper);
     };
 
-    // Defer initial calculation to ensure DOM has rendered with new data
-    let rafHandle = requestAnimationFrame(() => {
-      rafHandle = requestAnimationFrame(calculate);
-    });
-    window.addEventListener('resize', calculate);
-
-    const update = () => {
-      if (!wrapper || !cards || scrollDistanceRef.current <= 0) return;
-
-      const rect = wrapper.getBoundingClientRect();
-      const wrapperHeight = wrapper.offsetHeight;
-      const viewportH = window.innerHeight;
-      const scrollable = wrapperHeight - viewportH;
-      if (scrollable <= 0) return;
-      const scrolled = -rect.top;
-      const t = Math.max(0, Math.min(1, scrolled / scrollable));
-
-      cards.style.transform = `translate3d(${-t * scrollDistanceRef.current}px, 0, 0)`;
-
-      // Card reveal
-      const cardEls = cards.querySelectorAll('.project-card');
-      cardEls.forEach((card) => {
-        const cardRect = card.getBoundingClientRect();
-        const cardCenter = cardRect.left + cardRect.width / 2;
-        const viewCenter = window.innerWidth * 0.6;
-        const dist = Math.abs(cardCenter - viewCenter) / window.innerWidth;
-        const opacity = Math.max(0.4, 1 - dist);
-        const translateY = Math.max(0, dist * 40);
-        (card as HTMLElement).style.opacity = String(opacity);
-        (card as HTMLElement).style.transform = `translateY(${translateY}px)`;
-      });
-    };
-
-    // Use native scroll listener — Lenis triggers scroll events via window.scrollTo
-    // so this works regardless of whether Lenis is initialized yet
-    window.addEventListener('scroll', update, { passive: true });
-    update();
+    init();
 
     return () => {
-      cancelAnimationFrame(rafHandle);
-      window.removeEventListener('resize', calculate);
-      window.removeEventListener('scroll', update);
+      cancelled = true;
+      ctx?.revert();
     };
   }, [caseStudies]);
 
   return (
-    <section id="work" className="relative overflow-hidden bg-[#0a0a0a]">
-      {/* Desktop: sticky horizontal scroll driven by Lenis */}
+    <section id="work" className="relative bg-[#0a0a0a]">
+      {/* Desktop: GSAP ScrollTrigger pinned horizontal scroll */}
       <div
         ref={wrapperRef}
-        className="hidden md:block relative bg-[#0a0a0a]"
+        className="hidden md:block h-screen overflow-hidden bg-[#0a0a0a]"
       >
-        <div className="sticky top-0 h-screen overflow-hidden bg-[#0a0a0a]">
-          {/* Header */}
-          <div className="pt-16 md:pt-20 pb-4 px-4 sm:px-6">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
-                <div>
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    className="text-accent-blue text-sm font-medium tracking-widest uppercase mb-3 block"
-                  >
-                    Case Studies
-                  </motion.span>
-                  <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl tracking-tight">
-                    <AnimatedText text="Results that" />
-                    <br />
-                    <span className="text-gradient">
-                      <AnimatedText text="speak volumes" delay={0.2} />
-                    </span>
-                  </h2>
-                </div>
-                <div className="flex flex-col items-start md:items-end gap-3">
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    className="text-light-300/60 max-w-md text-sm"
-                  >
-                    Real campaigns. Real numbers. See how we&apos;ve helped businesses grow.
-                  </motion.p>
-                  <Link href="/case-studies" className="text-accent-blue text-sm font-medium hover:underline transition-all">
-                    View All Case Studies →
-                  </Link>
-                </div>
+        {/* Header */}
+        <div className="pt-16 md:pt-20 pb-4 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
+              <div>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  className="text-accent-blue text-sm font-medium tracking-widest uppercase mb-3 block"
+                >
+                  Case Studies
+                </motion.span>
+                <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl tracking-tight">
+                  <AnimatedText text="Results that" />
+                  <br />
+                  <span className="text-gradient">
+                    <AnimatedText text="speak volumes" delay={0.2} />
+                  </span>
+                </h2>
+              </div>
+              <div className="flex flex-col items-start md:items-end gap-3">
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  className="text-light-300/60 max-w-md text-sm"
+                >
+                  Real campaigns. Real numbers. See how we&apos;ve helped businesses grow.
+                </motion.p>
+                <Link href="/case-studies" className="text-accent-blue text-sm font-medium hover:underline transition-all">
+                  View All Case Studies →
+                </Link>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Horizontal cards */}
-          <div ref={cardsRef} className="flex gap-8 px-6 py-6 w-max items-start" style={{ willChange: 'transform' }}>
-            {caseStudies.map((study, i) => (
-              <Link
-                key={study.id}
-                href={`/case-studies/${study.slug}`}
-                className="project-card min-w-[500px] lg:min-w-[600px] group block"
-                data-cursor="pointer"
-              >
-                <ProjectCard study={study} index={i} />
-              </Link>
-            ))}
-            <div className="w-[10vw] shrink-0" />
-          </div>
+        {/* Horizontal cards */}
+        <div ref={cardsRef} className="flex gap-8 px-6 py-6 w-max items-start" style={{ willChange: 'transform' }}>
+          {caseStudies.map((study, i) => (
+            <Link
+              key={study.id}
+              href={`/case-studies/${study.slug}`}
+              className="project-card min-w-[500px] lg:min-w-[600px] group block"
+              data-cursor="pointer"
+            >
+              <ProjectCard study={study} index={i} />
+            </Link>
+          ))}
+          <div className="w-[10vw] shrink-0" />
         </div>
       </div>
 

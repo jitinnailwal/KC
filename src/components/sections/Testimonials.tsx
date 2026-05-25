@@ -88,7 +88,6 @@ export default function Testimonials() {
   const cardsRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const [testimonials, setTestimonials] = useState<Review[]>(fallbackTestimonials);
-  const scrollDistanceRef = useRef(0);
 
   // Defer API fetch until section is near viewport
   useEffect(() => {
@@ -118,145 +117,145 @@ export default function Testimonials() {
     return () => observer.disconnect();
   }, []);
 
-  // Calculate scroll distance and connect Lenis
+  // GSAP ScrollTrigger horizontal scroll with pin
   useEffect(() => {
     const cards = cardsRef.current;
     const wrapper = wrapperRef.current;
     if (!cards || !wrapper) return;
+    if (window.innerWidth < 768) return;
 
-    const calculate = () => {
-      const dist = cards.scrollWidth - window.innerWidth;
-      scrollDistanceRef.current = Math.max(0, dist);
-      wrapper.style.height = scrollDistanceRef.current > 0
-        ? `${window.innerHeight + scrollDistanceRef.current}px`
-        : '100vh';
+    let ctx: ReturnType<typeof import('gsap')['gsap']['context']> | null = null;
+    let cancelled = false;
+
+    const init = async () => {
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Wait for DOM to render cards
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      if (cancelled) return;
+
+      const totalScroll = cards.scrollWidth - window.innerWidth;
+      if (totalScroll <= 0) return;
+
+      ctx = gsap.context(() => {
+        gsap.to(cards, {
+          x: -totalScroll,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrapper,
+            pin: true,
+            anticipatePin: 1,
+            scrub: 1,
+            start: 'top top',
+            end: () => `+=${totalScroll}`,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              // Progress bar
+              if (progressRef.current) {
+                progressRef.current.style.transform = `scaleX(${self.progress})`;
+              }
+              // Card reveal based on viewport position
+              const cardEls = cards.querySelectorAll('.testimonial-card');
+              cardEls.forEach((card) => {
+                const cardRect = card.getBoundingClientRect();
+                const cardCenter = cardRect.left + cardRect.width / 2;
+                const viewCenter = window.innerWidth * 0.7;
+                const dist = Math.abs(cardCenter - viewCenter) / window.innerWidth;
+                const opacity = Math.max(0.3, 1 - dist * 1.2);
+                const scale = Math.max(0.95, 1 - dist * 0.08);
+                (card as HTMLElement).style.opacity = String(opacity);
+                (card as HTMLElement).style.transform = `scale(${scale})`;
+              });
+            },
+          },
+        });
+      }, wrapper);
     };
 
-    // Defer initial calculation to ensure DOM has rendered with new data
-    let rafHandle = requestAnimationFrame(() => {
-      rafHandle = requestAnimationFrame(calculate);
-    });
-    window.addEventListener('resize', calculate);
-
-    // Drive horizontal scroll via Lenis
-    const update = () => {
-      if (!wrapper || !cards || scrollDistanceRef.current <= 0) return;
-
-      const rect = wrapper.getBoundingClientRect();
-      const wrapperHeight = wrapper.offsetHeight;
-      const viewportH = window.innerHeight;
-      const scrollable = wrapperHeight - viewportH;
-      if (scrollable <= 0) return;
-      const scrolled = -rect.top;
-      const t = Math.max(0, Math.min(1, scrolled / scrollable));
-
-      cards.style.transform = `translate3d(${-t * scrollDistanceRef.current}px, 0, 0)`;
-
-      if (progressRef.current) {
-        progressRef.current.style.transform = `scaleX(${t})`;
-      }
-
-      // Card reveal effect
-      const cardEls = cards.querySelectorAll('.testimonial-card');
-      cardEls.forEach((card) => {
-        const cardRect = card.getBoundingClientRect();
-        const cardCenter = cardRect.left + cardRect.width / 2;
-        const viewCenter = window.innerWidth * 0.7;
-        const dist = Math.abs(cardCenter - viewCenter) / window.innerWidth;
-        const opacity = Math.max(0.3, 1 - dist * 1.2);
-        const scale = Math.max(0.95, 1 - dist * 0.08);
-        (card as HTMLElement).style.opacity = String(opacity);
-        (card as HTMLElement).style.transform = `scale(${scale})`;
-      });
-    };
-
-    // Use native scroll listener — Lenis triggers scroll events via window.scrollTo
-    // so this works regardless of whether Lenis is initialized yet
-    window.addEventListener('scroll', update, { passive: true });
-    update();
+    init();
 
     return () => {
-      cancelAnimationFrame(rafHandle);
-      window.removeEventListener('resize', calculate);
-      window.removeEventListener('scroll', update);
+      cancelled = true;
+      ctx?.revert();
     };
   }, [testimonials]);
 
   return (
-    <section className="relative bg-[#0a0a0a] overflow-hidden">
-      {/* Desktop: sticky horizontal scroll driven by Lenis */}
+    <section className="relative bg-[#0a0a0a]">
+      {/* Desktop: GSAP ScrollTrigger pinned horizontal scroll */}
       <div
         ref={wrapperRef}
-        className="hidden md:block relative bg-[#0a0a0a]"
+        className="hidden md:block h-screen overflow-hidden bg-[#0a0a0a]"
       >
-        <div className="sticky top-0 h-screen overflow-hidden">
-          {/* Background effects */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(ellipse at 20% 50%, rgba(79,140,255,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(200,169,106,0.04) 0%, transparent 60%)',
-            }}
-          />
+        {/* Background effects */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(ellipse at 20% 50%, rgba(79,140,255,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(200,169,106,0.04) 0%, transparent 60%)',
+          }}
+        />
 
-          {/* Header */}
-          <div className="pt-16 md:pt-20 pb-4 px-4 sm:px-6 relative z-10">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
-                <div>
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    className="text-accent-gold text-sm font-medium tracking-widest uppercase mb-3 block"
-                  >
-                    Client Reviews
-                  </motion.span>
-                  <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl tracking-tight">
-                    <AnimatedText text="What our clients" />
-                    <br />
-                    <span className="text-gradient">
-                      <AnimatedText text="say about us" delay={0.2} />
-                    </span>
-                  </h2>
-                </div>
-                <motion.p
+        {/* Header */}
+        <div className="pt-16 md:pt-20 pb-4 px-4 sm:px-6 relative z-10">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
+              <div>
+                <motion.span
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
                   viewport={{ once: true }}
-                  className="text-light-300/50 max-w-sm text-sm"
+                  className="text-accent-gold text-sm font-medium tracking-widest uppercase mb-3 block"
                 >
-                  Real feedback from brands we&apos;ve partnered with.
-                </motion.p>
+                  Client Reviews
+                </motion.span>
+                <h2 className="font-heading font-bold text-3xl md:text-4xl lg:text-5xl tracking-tight">
+                  <AnimatedText text="What our clients" />
+                  <br />
+                  <span className="text-gradient">
+                    <AnimatedText text="say about us" delay={0.2} />
+                  </span>
+                </h2>
               </div>
+              <motion.p
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                className="text-light-300/50 max-w-sm text-sm"
+              >
+                Real feedback from brands we&apos;ve partnered with.
+              </motion.p>
+            </div>
 
-              {/* Progress bar */}
-              <div className="h-[1px] bg-dark-700/40 rounded-full overflow-hidden">
-                <div
-                  ref={progressRef}
-                  className="h-full bg-gradient-to-r from-accent-blue to-accent-gold origin-left"
-                  style={{ transform: 'scaleX(0)' }}
-                />
-              </div>
+            {/* Progress bar */}
+            <div className="h-[1px] bg-dark-700/40 rounded-full overflow-hidden">
+              <div
+                ref={progressRef}
+                className="h-full bg-gradient-to-r from-accent-blue to-accent-gold origin-left"
+                style={{ transform: 'scaleX(0)' }}
+              />
             </div>
           </div>
+        </div>
 
-          {/* Horizontal cards */}
-          <div
-            ref={cardsRef}
-            className="flex gap-6 lg:gap-8 px-6 py-8 w-max"
-            style={{ willChange: 'transform' }}
-          >
-            {testimonials.map((testimonial, i) => (
-              <div
-                key={testimonial.id}
-                className="testimonial-card w-[500px] lg:w-[600px] shrink-0"
-              >
-                <TestimonialCard testimonial={testimonial} index={i} />
-              </div>
-            ))}
-            <div className="w-[10vw] shrink-0" />
-          </div>
+        {/* Horizontal cards */}
+        <div
+          ref={cardsRef}
+          className="flex gap-6 lg:gap-8 px-6 py-8 w-max"
+          style={{ willChange: 'transform' }}
+        >
+          {testimonials.map((testimonial, i) => (
+            <div
+              key={testimonial.id}
+              className="testimonial-card w-[500px] lg:w-[600px] shrink-0"
+            >
+              <TestimonialCard testimonial={testimonial} index={i} />
+            </div>
+          ))}
+          <div className="w-[10vw] shrink-0" />
         </div>
       </div>
 
