@@ -19,7 +19,7 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const blog = await Blog.findById(params.id).lean();
+    const blog = await Blog.findById(params.id);
     if (!blog) {
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }

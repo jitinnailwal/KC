@@ -16,7 +16,7 @@ const CACHE_HEADERS = {
 export async function GET() {
   try {
     await dbConnect();
-    const caseStudies = await CaseStudy.find().sort({ date: -1 }).lean();
+    const caseStudies = await CaseStudy.find().sort({ date: -1 });
     if (caseStudies.length === 0) {
       return NextResponse.json(getFallbackCaseStudies(), {
         headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },

@@ -15,7 +15,7 @@ const CACHE_HEADERS = {
 export async function GET() {
   try {
     await dbConnect();
-    const reviews = await Review.find().sort({ date: -1 }).lean();
+    const reviews = await Review.find().sort({ date: -1 });
     if (reviews.length === 0) {
       return NextResponse.json(getFallbackReviews(), {
         headers: { 'X-Data-Source': 'fallback-json', ...CACHE_HEADERS },

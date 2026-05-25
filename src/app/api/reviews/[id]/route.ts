@@ -18,7 +18,7 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const review = await Review.findById(params.id).lean();
+    const review = await Review.findById(params.id);
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });
     }

@@ -19,7 +19,7 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    const caseStudy = await CaseStudy.findById(params.id).lean();
+    const caseStudy = await CaseStudy.findById(params.id);
     if (!caseStudy) {
       return NextResponse.json({ error: 'Case study not found' }, { status: 404 });
     }
