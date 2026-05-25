@@ -127,13 +127,15 @@ export default function Testimonials() {
     const calculate = () => {
       const dist = cards.scrollWidth - window.innerWidth;
       scrollDistanceRef.current = Math.max(0, dist);
-      // Set wrapper height: viewport + horizontal scroll distance
-      if (scrollDistanceRef.current > 0) {
-        wrapper.style.height = `calc(100vh + ${scrollDistanceRef.current}px)`;
-      }
+      wrapper.style.height = scrollDistanceRef.current > 0
+        ? `${window.innerHeight + scrollDistanceRef.current}px`
+        : '100vh';
     };
 
-    calculate();
+    // Defer initial calculation to ensure DOM has rendered with new data
+    let rafHandle = requestAnimationFrame(() => {
+      rafHandle = requestAnimationFrame(calculate);
+    });
     window.addEventListener('resize', calculate);
 
     // Drive horizontal scroll via Lenis
@@ -144,6 +146,7 @@ export default function Testimonials() {
       const wrapperHeight = wrapper.offsetHeight;
       const viewportH = window.innerHeight;
       const scrollable = wrapperHeight - viewportH;
+      if (scrollable <= 0) return;
       const scrolled = -rect.top;
       const t = Math.max(0, Math.min(1, scrolled / scrollable));
 
@@ -173,17 +176,18 @@ export default function Testimonials() {
     update();
 
     return () => {
+      cancelAnimationFrame(rafHandle);
       window.removeEventListener('resize', calculate);
       window.removeEventListener('scroll', update);
     };
   }, [testimonials]);
 
   return (
-    <section className="relative bg-dark-900 overflow-hidden">
+    <section className="relative bg-[#0a0a0a] overflow-hidden">
       {/* Desktop: sticky horizontal scroll driven by Lenis */}
       <div
         ref={wrapperRef}
-        className="hidden md:block relative"
+        className="hidden md:block relative bg-[#0a0a0a]"
       >
         <div className="sticky top-0 h-screen overflow-hidden">
           {/* Background effects */}

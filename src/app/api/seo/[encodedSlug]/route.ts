@@ -41,29 +41,30 @@ export async function PUT(
 
     await dbConnect();
 
+    const updateData = {
+      metaTitle: body.metaTitle ?? '',
+      metaDescription: body.metaDescription ?? '',
+      canonicalUrl: body.canonicalUrl ?? '',
+      ogTitle: body.ogTitle ?? '',
+      ogDescription: body.ogDescription ?? '',
+      ogImage: body.ogImage ?? '',
+      twitterCard: body.twitterCard ?? 'summary_large_image',
+      robotsIndex: body.robotsIndex ?? true,
+      robotsFollow: body.robotsFollow ?? true,
+      structuredData: body.structuredData ?? '',
+      focusKeyword: body.focusKeyword ?? '',
+      updatedAt: new Date(),
+      updatedBy: body.updatedBy ?? '',
+    };
+
     const doc = await SeoPage.findOneAndUpdate(
       { slug },
       {
-        metaTitle: body.metaTitle ?? '',
-        metaDescription: body.metaDescription ?? '',
-        canonicalUrl: body.canonicalUrl ?? '',
-        ogTitle: body.ogTitle ?? '',
-        ogDescription: body.ogDescription ?? '',
-        ogImage: body.ogImage ?? '',
-        twitterCard: body.twitterCard ?? 'summary_large_image',
-        robotsIndex: body.robotsIndex ?? true,
-        robotsFollow: body.robotsFollow ?? true,
-        structuredData: body.structuredData ?? '',
-        focusKeyword: body.focusKeyword ?? '',
-        updatedAt: new Date(),
-        updatedBy: body.updatedBy ?? '',
+        $set: updateData,
+        $setOnInsert: { slug, pageLabel: body.pageLabel || slug },
       },
-      { new: true }
+      { new: true, upsert: true }
     );
-
-    if (!doc) {
-      return NextResponse.json({ error: 'Page not found' }, { status: 404 });
-    }
 
     return NextResponse.json(doc);
   } catch (error) {

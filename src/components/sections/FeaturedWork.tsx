@@ -110,12 +110,15 @@ export default function FeaturedWork() {
     const calculate = () => {
       const dist = cards.scrollWidth - window.innerWidth;
       scrollDistanceRef.current = Math.max(0, dist);
-      if (scrollDistanceRef.current > 0) {
-        wrapper.style.height = `calc(100vh + ${scrollDistanceRef.current}px)`;
-      }
+      wrapper.style.height = scrollDistanceRef.current > 0
+        ? `${window.innerHeight + scrollDistanceRef.current}px`
+        : '100vh';
     };
 
-    calculate();
+    // Defer initial calculation to ensure DOM has rendered with new data
+    let rafHandle = requestAnimationFrame(() => {
+      rafHandle = requestAnimationFrame(calculate);
+    });
     window.addEventListener('resize', calculate);
 
     const update = () => {
@@ -125,6 +128,7 @@ export default function FeaturedWork() {
       const wrapperHeight = wrapper.offsetHeight;
       const viewportH = window.innerHeight;
       const scrollable = wrapperHeight - viewportH;
+      if (scrollable <= 0) return;
       const scrolled = -rect.top;
       const t = Math.max(0, Math.min(1, scrolled / scrollable));
 
@@ -150,17 +154,18 @@ export default function FeaturedWork() {
     update();
 
     return () => {
+      cancelAnimationFrame(rafHandle);
       window.removeEventListener('resize', calculate);
       window.removeEventListener('scroll', update);
     };
   }, [caseStudies]);
 
   return (
-    <section id="work" className="relative overflow-hidden">
+    <section id="work" className="relative overflow-hidden bg-[#0a0a0a]">
       {/* Desktop: sticky horizontal scroll driven by Lenis */}
       <div
         ref={wrapperRef}
-        className="hidden md:block relative"
+        className="hidden md:block relative bg-[#0a0a0a]"
       >
         <div className="sticky top-0 h-screen overflow-hidden bg-[#0a0a0a]">
           {/* Header */}
