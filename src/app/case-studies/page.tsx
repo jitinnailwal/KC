@@ -18,6 +18,7 @@ interface CaseStudy {
   description: string;
   results: { metric: string; label: string }[];
   services: string[];
+  coverImage?: string;
   slug: string;
   published: boolean;
 }

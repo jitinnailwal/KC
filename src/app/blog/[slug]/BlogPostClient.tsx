@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { fetchJson } from '@/lib/fetch-json';
 
 interface BlogPost {
@@ -16,6 +17,7 @@ interface BlogPost {
   date: string;
   readTime: string;
   published: boolean;
+  coverImage?: string;
 }
 
 export default function BlogPostClient() {
@@ -116,6 +118,20 @@ export default function BlogPostClient() {
         <p className="text-xl text-light-300/60 leading-relaxed mb-12 max-w-3xl">
           {post.excerpt}
         </p>
+
+        {/* Cover Image */}
+        {post.coverImage && (
+          <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-dark-700/30 mb-12">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 896px"
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
 
         {/* Divider */}
         <div className="h-px bg-dark-700/30 mb-12" />
