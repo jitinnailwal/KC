@@ -37,7 +37,7 @@ export default function Home() {
       timer = setTimeout(() => {
         ScrollTrigger.sort();
         ScrollTrigger.refresh(true);
-      }, 1500);
+      }, 2500);
     };
 
     init();

@@ -140,6 +140,10 @@ export default function FeaturedWork() {
             end: () => `+=${totalScroll}`,
             invalidateOnRefresh: true,
             pinSpacing: true,
+            refreshPriority: 0,
+            onRefresh: () => {
+              gsap.set(cards, { x: 0 });
+            },
             onUpdate: () => {
               const cardEls = cards.querySelectorAll('.project-card');
               cardEls.forEach((card) => {
@@ -156,10 +160,6 @@ export default function FeaturedWork() {
           },
         });
       }, section);
-
-      // Recalculate all triggers after creation
-      ScrollTrigger.sort();
-      ScrollTrigger.refresh();
     };
 
     init();

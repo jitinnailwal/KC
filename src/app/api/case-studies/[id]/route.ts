@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { jsonError } from '@/lib/api-error';
 import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackCaseStudy } from '@/lib/fallback-content';
 import { generateSlug } from '@/lib/utils';
 import CaseStudy from '@/models/CaseStudy';
+import SeoPage from '@/models/SeoPage';
 
 export const runtime = 'nodejs';
 
@@ -59,6 +61,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Case study not found' }, { status: 404 });
     }
 
+    const oldSlug = caseStudy.slug;
+
     if (body.client !== undefined) {
       caseStudy.client = body.client;
       caseStudy.slug = generateSlug(body.client);
@@ -75,6 +79,20 @@ export async function PUT(
     if (body.content !== undefined) caseStudy.content = body.content;
 
     await caseStudy.save();
+
+    // Sync SeoPage if slug changed
+    if (caseStudy.slug !== oldSlug) {
+      await SeoPage.findOneAndUpdate(
+        { slug: `/case-studies/${oldSlug}` },
+        { $set: { slug: `/case-studies/${caseStudy.slug}`, pageLabel: `${caseStudy.client} Case Study` } }
+      ).catch(() => {});
+      revalidatePath(`/case-studies/${oldSlug}`);
+    }
+
+    revalidatePath('/case-studies');
+    revalidatePath(`/case-studies/${caseStudy.slug}`);
+    revalidatePath('/');
+
     return NextResponse.json(caseStudy);
   } catch (error) {
     return jsonError(
@@ -101,6 +119,13 @@ export async function DELETE(
     if (!caseStudy) {
       return NextResponse.json({ error: 'Case study not found' }, { status: 404 });
     }
+
+    await SeoPage.deleteOne({ slug: `/case-studies/${caseStudy.slug}` }).catch(() => {});
+
+    revalidatePath('/case-studies');
+    revalidatePath(`/case-studies/${caseStudy.slug}`);
+    revalidatePath('/');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return jsonError(

@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { jsonError } from '@/lib/api-error';
 import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
 import { getFallbackBlog } from '@/lib/fallback-content';
 import { generateSlug, estimateReadTime } from '@/lib/utils';
 import Blog from '@/models/Blog';
+import SeoPage from '@/models/SeoPage';
 
 export const runtime = 'nodejs';
 
@@ -59,6 +61,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
 
+    const oldSlug = blog.slug;
+
     if (body.title !== undefined) {
       blog.title = body.title;
       blog.slug = generateSlug(body.title);
@@ -74,6 +78,20 @@ export async function PUT(
     if (body.coverImage !== undefined) blog.coverImage = body.coverImage;
 
     await blog.save();
+
+    // Sync SeoPage if slug changed
+    if (blog.slug !== oldSlug) {
+      await SeoPage.findOneAndUpdate(
+        { slug: `/blog/${oldSlug}` },
+        { $set: { slug: `/blog/${blog.slug}`, pageLabel: blog.title } }
+      ).catch(() => {});
+      revalidatePath(`/blog/${oldSlug}`);
+    }
+
+    revalidatePath('/blog');
+    revalidatePath(`/blog/${blog.slug}`);
+    revalidatePath('/');
+
     return NextResponse.json(blog);
   } catch (error) {
     return jsonError(
@@ -100,6 +118,13 @@ export async function DELETE(
     if (!blog) {
       return NextResponse.json({ error: 'Blog not found' }, { status: 404 });
     }
+
+    await SeoPage.deleteOne({ slug: `/blog/${blog.slug}` }).catch(() => {});
+
+    revalidatePath('/blog');
+    revalidatePath(`/blog/${blog.slug}`);
+    revalidatePath('/');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return jsonError(

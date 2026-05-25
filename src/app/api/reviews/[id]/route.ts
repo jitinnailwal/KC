@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { jsonError } from '@/lib/api-error';
 import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
@@ -66,6 +67,9 @@ export async function PUT(
     if (body.image !== undefined) review.image = body.image;
 
     await review.save();
+
+    revalidatePath('/');
+
     return NextResponse.json(review);
   } catch (error) {
     return jsonError(
@@ -92,6 +96,9 @@ export async function DELETE(
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });
     }
+
+    revalidatePath('/');
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return jsonError(

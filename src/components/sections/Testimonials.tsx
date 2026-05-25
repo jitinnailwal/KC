@@ -156,6 +156,7 @@ export default function Testimonials() {
             end: () => `+=${totalScroll}`,
             invalidateOnRefresh: true,
             pinSpacing: true,
+            refreshPriority: 1,
             onUpdate: (self) => {
               if (progressRef.current) {
                 progressRef.current.style.transform = `scaleX(${self.progress})`;
@@ -175,10 +176,6 @@ export default function Testimonials() {
           },
         });
       }, section);
-
-      // Recalculate all triggers after creation
-      ScrollTrigger.sort();
-      ScrollTrigger.refresh();
     };
 
     init();

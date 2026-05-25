@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { jsonError } from '@/lib/api-error';
 import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
@@ -94,6 +95,10 @@ export async function POST(request: NextRequest) {
       },
       { upsert: true }
     ).catch(() => {});
+
+    revalidatePath('/blog');
+    revalidatePath(`/blog/${blog.slug}`);
+    revalidatePath('/');
 
     return NextResponse.json(blog, { status: 201 });
   } catch (error) {

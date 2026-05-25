@@ -69,14 +69,19 @@ export async function POST(request: NextRequest) {
       uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Upload configuration is unavailable';
+    const isMissingEnv = message.includes('Missing Cloudinary environment variables');
+
     console.error('[upload-signature] failed to create upload signature', {
-      error: error instanceof Error ? error.message : error,
+      error: message,
       requestId,
     });
 
     return NextResponse.json(
       {
-        error: 'Upload configuration is unavailable',
+        error: isMissingEnv
+          ? 'Image upload is not configured. Please set Cloudinary environment variables in Vercel dashboard.'
+          : 'Upload configuration is unavailable',
         requestId,
       },
       { status: 500 }

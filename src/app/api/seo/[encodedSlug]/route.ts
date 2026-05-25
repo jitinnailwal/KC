@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/mongodb';
 import SeoPage from '@/models/SeoPage';
 import { requireAuth } from '@/lib/auth';
@@ -65,6 +66,9 @@ export async function PUT(
       },
       { new: true, upsert: true }
     );
+
+    // Invalidate cached page so generateMetadata picks up new SEO data
+    revalidatePath(slug);
 
     return NextResponse.json(doc);
   } catch (error) {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { jsonError } from '@/lib/api-error';
 import { requireAuth } from '@/lib/auth';
 import dbConnect, { isMongoConnectionError } from '@/lib/mongodb';
@@ -75,6 +76,8 @@ export async function POST(request: NextRequest) {
       date: new Date().toISOString().split('T')[0],
       image: body.image || '',
     });
+
+    revalidatePath('/');
 
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
