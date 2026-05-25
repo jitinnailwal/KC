@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { uploadImage } from '@/lib/client-upload';
 import { fetchJson, getErrorMessage } from '@/lib/fetch-json';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminEmptyState from '@/components/admin/AdminEmptyState';
@@ -62,24 +63,22 @@ export default function AdminBlog() {
   }, [fetchBlogs]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+    setError(null);
 
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const data = await fetchJson<{ url?: string }>(res);
-      const uploadedUrl = data.url;
-      if (uploadedUrl) {
-        setForm((prev) => ({ ...prev, coverImage: uploadedUrl }));
-      }
+      const uploaded = await uploadImage(file, 'blog');
+      setForm((prev) => ({ ...prev, coverImage: uploaded.url }));
     } catch (err) {
       setError(getErrorMessage(err));
+    } finally {
+      setUploading(false);
+      input.value = '';
     }
-    setUploading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

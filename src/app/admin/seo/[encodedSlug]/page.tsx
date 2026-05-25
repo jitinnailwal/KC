@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { uploadImage } from '@/lib/client-upload';
+import { getErrorMessage } from '@/lib/fetch-json';
 
 interface SeoData {
   slug: string;
@@ -38,8 +40,10 @@ export default function AdminSeoEditor() {
   const [data, setData] = useState<SeoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [fatalError, setFatalError] = useState('');
   const [jsonError, setJsonError] = useState('');
 
   useEffect(() => {
@@ -49,7 +53,7 @@ export default function AdminSeoEditor() {
         return r.json();
       })
       .then((d) => setData(d))
-      .catch(() => setError('Page not found'))
+      .catch(() => setFatalError('Page not found'))
       .finally(() => setLoading(false));
   }, [encodedSlug]);
 
@@ -77,6 +81,7 @@ export default function AdminSeoEditor() {
     if (!data || jsonError) return;
     setSaving(true);
     setSaved(false);
+    setError('');
     try {
       const res = await fetch(`/api/seo/${encodedSlug}`, {
         method: 'PUT',
@@ -95,6 +100,25 @@ export default function AdminSeoEditor() {
     }
   };
 
+  const handleOgImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setError('');
+
+    try {
+      const uploaded = await uploadImage(file, 'seo');
+      update('ogImage', uploaded.url);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setUploadingImage(false);
+      input.value = '';
+    }
+  };
+
   if (loading) {
     return (
       <AdminLayout title="SEO Editor">
@@ -105,10 +129,10 @@ export default function AdminSeoEditor() {
     );
   }
 
-  if (error || !data) {
+  if (fatalError || !data) {
     return (
       <AdminLayout title="SEO Editor">
-        <div className="text-center py-20 text-red-400">{error || 'Page not found'}</div>
+        <div className="text-center py-20 text-red-400">{fatalError || 'Page not found'}</div>
       </AdminLayout>
     );
   }
@@ -132,6 +156,12 @@ export default function AdminSeoEditor() {
       }
     >
       <div className="max-w-3xl mx-auto space-y-8">
+        {error && (
+          <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
         {/* Google SERP Preview */}
         <div>
           <h3 className="text-xs uppercase tracking-wider text-light-300/40 mb-3 font-medium">Google Preview</h3>
@@ -245,13 +275,25 @@ export default function AdminSeoEditor() {
             </div>
             <div>
               <label className="block text-xs text-light-300/40 mb-1.5">OG Image URL</label>
-              <input
-                type="url"
-                value={data.ogImage}
-                onChange={(e) => update('ogImage', e.target.value)}
-                placeholder="https://res.cloudinary.com/..."
-                className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors"
-              />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="url"
+                  value={data.ogImage}
+                  onChange={(e) => update('ogImage', e.target.value)}
+                  placeholder="https://res.cloudinary.com/..."
+                  className="w-full px-4 py-2.5 rounded-lg bg-dark-900 border border-dark-700/50 text-sm text-light placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors"
+                />
+                <label className="px-4 py-2.5 rounded-lg text-sm font-medium border border-dark-700/50 text-light-300/60 hover:text-light hover:border-dark-700 transition-colors cursor-pointer text-center whitespace-nowrap">
+                  {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleOgImageUpload}
+                    className="hidden"
+                    disabled={uploadingImage}
+                  />
+                </label>
+              </div>
             </div>
           </div>
 
