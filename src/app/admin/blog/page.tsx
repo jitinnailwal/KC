@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import Image from 'next/image';
 import { uploadImage } from '@/lib/client-upload';
 import { fetchJson, getErrorMessage } from '@/lib/fetch-json';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminEmptyState from '@/components/admin/AdminEmptyState';
+
+const RichTextEditor = lazy(() => import('@/components/admin/RichTextEditor'));
 
 interface BlogPost {
   id: string;
@@ -311,16 +313,13 @@ export default function AdminBlog() {
                 <label className="block text-sm text-light-300/60 mb-1.5">
                   Content *
                 </label>
-                <textarea
-                  value={form.content}
-                  onChange={(e) =>
-                    setForm({ ...form, content: e.target.value })
-                  }
-                  rows={12}
-                  className="w-full px-4 py-3 rounded-lg bg-dark-900 border border-dark-700/40 text-light focus:border-accent-blue/50 focus:outline-none transition-colors text-sm resize-y font-mono leading-relaxed"
-                  placeholder="Write your blog content here... Use double newlines for paragraphs."
-                  required
-                />
+                <Suspense fallback={<div className="h-[400px] rounded-lg bg-dark-900 border border-dark-700/40 flex items-center justify-center text-light-300/40 text-sm">Loading editor...</div>}>
+                  <RichTextEditor
+                    content={form.content}
+                    onChange={(html) => setForm({ ...form, content: html })}
+                    placeholder="Write your blog content here..."
+                  />
+                </Suspense>
               </div>
 
               {/* Published toggle */}

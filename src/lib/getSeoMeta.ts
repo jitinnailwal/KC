@@ -21,9 +21,9 @@ export async function getSeoMeta(slug: string): Promise<Metadata> {
       meta.description = doc.metaDescription;
     }
 
-    if (doc.canonicalUrl) {
-      meta.alternates = { canonical: doc.canonicalUrl };
-    }
+    // Always set canonical URL — use admin-set value or derive from slug
+    const canonical = doc.canonicalUrl || `${BASE_URL}${slug === '/' ? '' : slug}`;
+    meta.alternates = { canonical };
 
     const indexStr = doc.robotsIndex ? 'index' : 'noindex';
     const followStr = doc.robotsFollow ? 'follow' : 'nofollow';

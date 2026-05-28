@@ -69,6 +69,10 @@ export async function PUT(
 
     // Invalidate cached page so generateMetadata picks up new SEO data
     revalidatePath(slug);
+    // Also revalidate the layout to ensure metadata changes are reflected
+    if (slug !== '/') {
+      revalidatePath('/');
+    }
 
     return NextResponse.json(doc);
   } catch (error) {

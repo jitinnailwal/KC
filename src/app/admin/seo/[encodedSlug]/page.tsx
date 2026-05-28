@@ -192,6 +192,18 @@ export default function AdminSeoEditor() {
 
         {/* Form */}
         <div className="space-y-6">
+          {/* Slug */}
+          <div>
+            <label className="block text-xs text-light-300/50 uppercase tracking-wider mb-2">Page Slug</label>
+            <input
+              type="text"
+              value={data.slug}
+              readOnly
+              className="w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-dark-700/30 text-sm text-light-300/50 font-mono cursor-not-allowed"
+            />
+            <p className="text-xs text-light-300/30 mt-1">The slug is derived from the page URL and cannot be edited here.</p>
+          </div>
+
           {/* Focus Keyword */}
           <div>
             <label className="block text-xs text-light-300/50 uppercase tracking-wider mb-2">Focus Keyword</label>

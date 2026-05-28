@@ -157,16 +157,10 @@ export default function BlogPostClient() {
         </div>
 
         {/* Content */}
-        <div className="prose-custom">
-          {post.content.split('\n\n').map((paragraph, i) => (
-            <p
-              key={i}
-              className="text-light-300/70 text-lg leading-relaxed mb-6"
-            >
-              {paragraph}
-            </p>
-          ))}
-        </div>
+        <div
+          className="blog-content"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
 
         {/* Back link */}
         <div className="mt-16 pt-8 border-t border-dark-700/30">

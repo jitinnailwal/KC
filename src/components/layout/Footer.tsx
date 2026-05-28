@@ -58,9 +58,9 @@ const footerLinks = {
     { name: 'Digital Marketing Agency in Delhi', href: '/locations/delhi' },
     { name: 'Digital Marketing Agency in Varanasi', href: '/locations/varanasi' },
     { name: 'Digital Marketing Agency in Bangalore', href: '/locations/bengaluru' },
-    { name: 'Digital Marketing Agency in UK', href: '/contact' },
-    { name: 'Digital Marketing Agency in USA', href: '/contact' },
-    { name: 'Digital Marketing Agency in UAE', href: '/contact' },
+    { name: 'Digital Marketing Agency in UK', href: '' },
+    { name: 'Digital Marketing Agency in USA', href: '' },
+    { name: 'Digital Marketing Agency in UAE', href: '' },
   ],
 };
 
@@ -113,9 +113,9 @@ export default function Footer() {
 
             {/* Locations */}
             <div className="flex flex-wrap gap-2 mt-4">
-              {['Delhi', 'Varanasi', 'Bangalore', 'UK', 'USA', 'UAE'].map((city) => (
-                <span key={city} className="px-3 py-1 rounded-full text-xs text-light-300/80 border border-dark-700/50">
-                  {city}
+              {['India', 'UK', 'USA', 'UAE'].map((country) => (
+                <span key={country} className="px-3 py-1 rounded-full text-xs text-light-300/80 border border-dark-700/50">
+                  {country}
                 </span>
               ))}
             </div>
@@ -130,15 +130,21 @@ export default function Footer() {
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-light-300/80 hover:text-light transition-colors"
-                      target={link.href.startsWith('http') ? '_blank' : undefined}
-                      rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                      data-cursor="pointer"
-                    >
-                      {link.name}
-                    </a>
+                    {link.href ? (
+                      <a
+                        href={link.href}
+                        className="text-sm text-light-300/80 hover:text-light transition-colors"
+                        target={link.href.startsWith('http') ? '_blank' : undefined}
+                        rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        data-cursor="pointer"
+                      >
+                        {link.name}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-light-300/80">
+                        {link.name}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
