@@ -55,12 +55,10 @@ const footerLinks = {
     { name: 'Contact', href: '/contact' },
   ],
   'Locations We Serve': [
-    { name: 'Digital Marketing Agency in Delhi', href: '/locations/delhi' },
-    { name: 'Digital Marketing Agency in Varanasi', href: '/locations/varanasi' },
-    { name: 'Digital Marketing Agency in Bangalore', href: '/locations/bengaluru' },
-    { name: 'Digital Marketing Agency in UK', href: '' },
-    { name: 'Digital Marketing Agency in USA', href: '' },
-    { name: 'Digital Marketing Agency in UAE', href: '' },
+    { name: 'India', href: '' },
+    { name: 'UK', href: '' },
+    { name: 'USA', href: '' },
+    { name: 'UAE', href: '' },
   ],
 };
 
