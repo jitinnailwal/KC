@@ -28,7 +28,7 @@ const BASE_URL = 'https://kreativecatalyst.in';
 
 function encodeSlug(slug: string): string {
   if (slug === '/') return 'home';
-  return slug.replace(/^\//, '').replace(/\//g, '__');
+  return slug.slice(1).replace(/\//g, '__');
 }
 
 function charColor(len: number, warn: number, danger: number): string {
@@ -94,21 +94,22 @@ export default function AdminSeoEditor() {
         body: JSON.stringify({ ...data, updatedBy: 'admin' }),
       });
       if (!res.ok) {
-        if (res.status === 409) throw new Error('Another page already uses that slug.');
-        throw new Error('Failed');
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to save');
       }
       const updated = await res.json();
       setData(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
 
-      // If the slug changed, the record now lives at a different URL — move there.
+      // If the slug was changed, the URL's encodedSlug no longer matches the
+      // document — redirect to the new editor route so reloads/saves keep working.
       const newEncoded = encodeSlug(updated.slug);
       if (newEncoded !== encodedSlug) {
         router.replace(`/admin/seo/${newEncoded}`);
       }
     } catch (err) {
-      setError(getErrorMessage(err) || 'Failed to save');
+      setError(getErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -213,10 +214,10 @@ export default function AdminSeoEditor() {
               type="text"
               value={data.slug}
               onChange={(e) => update('slug', e.target.value)}
-              placeholder="/about"
+              placeholder="/example-page"
               className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-700/50 text-sm text-light font-mono placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors"
             />
-            <p className="text-xs text-light-300/30 mt-1">The page path this SEO data applies to (e.g. <code>/about</code>, or <code>/</code> for the home page). Changing it moves these settings to a different page.</p>
+            <p className="text-xs text-light-300/30 mt-1">Must start with &ldquo;/&rdquo;. This is the page URL path the SEO data maps to — changing it re-points the entry to a different page.</p>
           </div>
 
           {/* Focus Keyword */}
