@@ -195,9 +195,11 @@ export default function Navbar() {
                       href={link.href}
                       className="text-sm text-light-300 hover:text-light transition-colors relative group inline-flex items-center gap-1"
                       data-cursor="pointer"
+                      aria-expanded={activeDropdown === link.name}
+                      aria-haspopup="true"
                     >
                       {link.name}
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform duration-200 ${activeDropdown === link.name ? 'rotate-180' : ''}`}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform duration-200 ${activeDropdown === link.name ? 'rotate-180' : ''}`} aria-hidden="true">
                         <polyline points="6 9 12 15 18 9" />
                       </svg>
                       <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-accent-blue group-hover:w-full transition-all duration-300" />

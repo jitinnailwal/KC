@@ -69,9 +69,16 @@ export async function POST(request: NextRequest) {
 
     await dbConnect();
 
+    // Generate unique slug — append suffix if a post with this slug already exists
+    let slug = generateSlug(body.title);
+    const existing = await Blog.findOne({ slug });
+    if (existing) {
+      slug = `${slug}-${Date.now().toString(36)}`;
+    }
+
     const blog = await Blog.create({
       title: body.title,
-      slug: generateSlug(body.title),
+      slug,
       excerpt: body.excerpt || '',
       content: body.content,
       category: body.category || 'General',

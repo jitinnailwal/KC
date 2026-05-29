@@ -29,11 +29,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: `${title} | Kreative Catalyst`,
       description,
+      alternates: {
+        canonical: `${baseUrl}/case-studies/${params.slug}`,
+      },
       openGraph: {
         title,
         description,
         type: 'article',
         url: `${baseUrl}/case-studies/${params.slug}`,
+        siteName: 'Kreative Catalyst',
+        locale: 'en_IN',
         ...(study.coverImage ? { images: [{ url: study.coverImage }] } : {}),
       },
       twitter: {

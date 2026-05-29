@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getSeoMeta } from '@/lib/getSeoMeta';
+import { getSeoMeta, getSeoStructuredData } from '@/lib/getSeoMeta';
 import BlogPostClient from './BlogPostClient';
 
 interface Props {
@@ -26,6 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: `${post.title} | Kreative Catalyst Blog`,
       description: post.excerpt || `Read ${post.title} on Kreative Catalyst blog.`,
+      alternates: {
+        canonical: `${baseUrl}/blog/${params.slug}`,
+      },
       openGraph: {
         title: post.title,
         description: post.excerpt || `Read ${post.title} on Kreative Catalyst blog.`,
@@ -33,6 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         publishedTime: post.date,
         authors: [post.author],
         url: `${baseUrl}/blog/${params.slug}`,
+        siteName: 'Kreative Catalyst',
+        locale: 'en_IN',
       },
       twitter: {
         card: 'summary_large_image',
@@ -45,6 +50,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function BlogPostPage() {
-  return <BlogPostClient />;
+export default async function BlogPostPage({ params }: Props) {
+  const structuredData = await getSeoStructuredData(`/blog/${params.slug}`);
+
+  return (
+    <>
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: structuredData }}
+        />
+      )}
+      <BlogPostClient />
+    </>
+  );
 }

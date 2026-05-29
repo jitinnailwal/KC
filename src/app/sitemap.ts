@@ -16,6 +16,10 @@ const staticPages = [
   { path: '/blog', priority: 0.8 },
   { path: '/case-studies', priority: 0.8 },
   { path: '/contact', priority: 0.7 },
+  { path: '/triple-play-model', priority: 0.7 },
+  { path: '/locations/delhi', priority: 0.6 },
+  { path: '/locations/varanasi', priority: 0.6 },
+  { path: '/locations/bengaluru', priority: 0.6 },
 ];
 
 async function fetchSlugs(endpoint: string): Promise<{ slug: string; date?: string }[]> {

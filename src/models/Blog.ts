@@ -39,6 +39,6 @@ const BlogSchema = new Schema<IBlog>(
   }
 );
 
-BlogSchema.index({ date: -1 });
+BlogSchema.index({ published: 1, date: -1 });
 
 export default mongoose.models.Blog || mongoose.model<IBlog>('Blog', BlogSchema);

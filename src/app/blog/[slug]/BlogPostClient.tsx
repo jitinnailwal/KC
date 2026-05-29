@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import DOMPurify from 'dompurify';
 import { fetchJson } from '@/lib/fetch-json';
 
 interface BlogPost {
@@ -41,6 +42,26 @@ export default function BlogPostClient() {
     }
     fetchPost();
   }, [slug]);
+
+  const sanitizedContent = useMemo(
+    () => post?.content
+      ? DOMPurify.sanitize(post.content, {
+          ALLOWED_TAGS: [
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr',
+            'strong', 'b', 'em', 'i', 'u', 's', 'del',
+            'ul', 'ol', 'li',
+            'blockquote', 'pre', 'code',
+            'a', 'img',
+            'div', 'span',
+          ],
+          ALLOWED_ATTR: [
+            'href', 'target', 'rel', 'src', 'alt', 'width', 'height',
+            'class', 'id',
+          ],
+        })
+      : '',
+    [post?.content]
+  );
 
   if (loading) {
     return (
@@ -93,6 +114,7 @@ export default function BlogPostClient() {
       </nav>
 
       {/* Article */}
+      <main>
       <article className="max-w-4xl mx-auto px-6 py-16 md:py-24">
         {/* Meta */}
         <div className="flex items-center gap-3 mb-6">
@@ -159,7 +181,7 @@ export default function BlogPostClient() {
         {/* Content */}
         <div
           className="blog-content"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         />
 
         {/* Back link */}
@@ -175,6 +197,7 @@ export default function BlogPostClient() {
           </Link>
         </div>
       </article>
+      </main>
     </div>
   );
 }

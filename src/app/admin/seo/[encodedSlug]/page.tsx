@@ -26,6 +26,11 @@ interface SeoData {
 
 const BASE_URL = 'https://kreativecatalyst.in';
 
+function encodeSlug(slug: string): string {
+  if (slug === '/') return 'home';
+  return slug.replace(/^\//, '').replace(/\//g, '__');
+}
+
 function charColor(len: number, warn: number, danger: number): string {
   if (len <= warn) return 'text-emerald-400';
   if (len <= danger) return 'text-orange-400';
@@ -88,13 +93,22 @@ export default function AdminSeoEditor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, updatedBy: 'admin' }),
       });
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) {
+        if (res.status === 409) throw new Error('Another page already uses that slug.');
+        throw new Error('Failed');
+      }
       const updated = await res.json();
       setData(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
-    } catch {
-      setError('Failed to save');
+
+      // If the slug changed, the record now lives at a different URL — move there.
+      const newEncoded = encodeSlug(updated.slug);
+      if (newEncoded !== encodedSlug) {
+        router.replace(`/admin/seo/${newEncoded}`);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Failed to save');
     } finally {
       setSaving(false);
     }
@@ -179,7 +193,7 @@ export default function AdminSeoEditor() {
             {data.ogImage && (
               <div className="h-40 bg-dark-800 flex items-center justify-center overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={data.ogImage} alt="" className="w-full h-full object-cover" />
+                <img src={data.ogImage} alt="Open Graph image preview" className="w-full h-full object-cover" />
               </div>
             )}
             <div className="p-4 space-y-1">
@@ -198,10 +212,11 @@ export default function AdminSeoEditor() {
             <input
               type="text"
               value={data.slug}
-              readOnly
-              className="w-full px-4 py-3 rounded-lg bg-dark-800/50 border border-dark-700/30 text-sm text-light-300/50 font-mono cursor-not-allowed"
+              onChange={(e) => update('slug', e.target.value)}
+              placeholder="/about"
+              className="w-full px-4 py-3 rounded-lg bg-dark-800 border border-dark-700/50 text-sm text-light font-mono placeholder:text-light-300/30 focus:outline-none focus:border-accent-blue/30 transition-colors"
             />
-            <p className="text-xs text-light-300/30 mt-1">The slug is derived from the page URL and cannot be edited here.</p>
+            <p className="text-xs text-light-300/30 mt-1">The page path this SEO data applies to (e.g. <code>/about</code>, or <code>/</code> for the home page). Changing it moves these settings to a different page.</p>
           </div>
 
           {/* Focus Keyword */}

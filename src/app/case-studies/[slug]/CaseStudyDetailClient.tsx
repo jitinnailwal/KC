@@ -71,7 +71,7 @@ export default function CaseStudyDetailClient() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-dark text-light">
+      <main className="min-h-screen bg-dark text-light">
         {/* Hero */}
         <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 px-4 sm:px-6 overflow-hidden">
           <div className="absolute top-0 right-0 w-[600px] h-[400px] rounded-full"
@@ -182,7 +182,7 @@ export default function CaseStudyDetailClient() {
         </section>
 
         <Footer />
-      </div>
+      </main>
     </>
   );
 }

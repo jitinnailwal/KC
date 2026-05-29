@@ -4,6 +4,20 @@ import SeoPage from '@/models/SeoPage';
 
 const BASE_URL = 'https://kreativecatalyst.in';
 
+/** Fetch custom structured data (JSON-LD) for a page from admin SEO settings */
+export async function getSeoStructuredData(slug: string): Promise<string | null> {
+  try {
+    await dbConnect();
+    const doc = await SeoPage.findOne({ slug }).lean();
+    if (!doc?.structuredData?.trim()) return null;
+    // Validate JSON before returning
+    JSON.parse(doc.structuredData);
+    return doc.structuredData;
+  } catch {
+    return null;
+  }
+}
+
 export async function getSeoMeta(slug: string): Promise<Metadata> {
   try {
     await dbConnect();
