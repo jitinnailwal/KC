@@ -26,8 +26,8 @@ function getClientIp(request: NextRequest): string {
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
   const { allowed, resetIn } = checkRateLimit(`auth:${ip}`, {
-    maxRequests: 5,
-    windowMs: 15 * 60_000, // 15 minutes
+    maxRequests: 30,
+    windowMs: 2 * 60_000, // 2 minutes
   });
 
   if (!allowed) {
