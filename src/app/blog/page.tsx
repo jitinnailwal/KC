@@ -9,7 +9,7 @@ export default function BlogPage() {
     <>
       <Navbar />
       <main className="pt-16">
-        <Blog />
+        <Blog paginated />
       </main>
       <Footer />
     </>

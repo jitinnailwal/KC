@@ -79,11 +79,20 @@ const fallbackPosts: BlogPost[] = [
   },
 ];
 
-export default function Blog() {
+const PAGE_SIZE = 6;
+
+interface BlogProps {
+  /** When true, render all published posts behind a "Load More" pager.
+   *  When false (homepage preview), only the first batch is ever shown. */
+  paginated?: boolean;
+}
+
+export default function Blog({ paginated = false }: BlogProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
   const [posts, setPosts] = useState<BlogPost[]>(fallbackPosts);
   const [loading] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Defer API fetch until section is near viewport
   useEffect(() => {
@@ -99,7 +108,7 @@ export default function Blog() {
           fetch('/api/blog')
             .then((res) => fetchJson<BlogPost[]>(res))
             .then((data: BlogPost[]) => {
-              const published = data.filter((p) => p.published).slice(0, 6);
+              const published = data.filter((p) => p.published);
               if (published.length > 0) {
                 setPosts(published);
               }
@@ -115,6 +124,13 @@ export default function Blog() {
 
     return () => observer.disconnect();
   }, []);
+
+  // Homepage preview always caps at one batch; the /blog page reveals posts
+  // in batches of PAGE_SIZE via the Load More button.
+  const displayedPosts = paginated
+    ? posts.slice(0, visibleCount)
+    : posts.slice(0, PAGE_SIZE);
+  const hasMore = paginated && visibleCount < posts.length;
 
   return (
     <section id="blog" ref={sectionRef} className="relative py-24 md:py-32 overflow-hidden">
@@ -176,7 +192,7 @@ export default function Blog() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post, i) => {
+            {displayedPosts.map((post, i) => {
               const accent = categoryColors[post.category] || '#4F8CFF';
               const gradient =
                 categoryGradients[post.category] ||
@@ -189,7 +205,7 @@ export default function Blog() {
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{
                     duration: 0.6,
-                    delay: i * 0.1,
+                    delay: (i % PAGE_SIZE) * 0.1,
                     ease: 'easeOut',
                   }}
                 >
@@ -280,6 +296,32 @@ export default function Blog() {
                 </motion.div>
               );
             })}
+          </div>
+        )}
+
+        {/* Load More */}
+        {hasMore && (
+          <div className="flex justify-center mt-12 md:mt-16">
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              className="glass group inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-medium text-light hover:border-accent-blue/30 transition-all duration-500"
+              data-cursor="pointer"
+            >
+              <span>Load More</span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="group-hover:translate-y-0.5 transition-transform duration-300"
+              >
+                <path d="M12 5v14M5 12l7 7 7-7" />
+              </svg>
+            </motion.button>
           </div>
         )}
       </div>
