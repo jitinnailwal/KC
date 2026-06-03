@@ -17,57 +17,6 @@ interface CaseStudy {
   published: boolean;
 }
 
-const fallbackCaseStudies: CaseStudy[] = [
-  {
-    id: '1',
-    client: 'UT Sarees',
-    industry: 'E-Commerce / Fashion',
-    headline: 'From Zero to ₹50 Lacs Revenue',
-    description:
-      'We partnered with UT Sarees to build and scale their online presence from scratch. Through strategic Google Search and Shopping campaigns, we delivered exceptional results that transformed their business.',
-    results: [
-      { metric: '₹50 Lacs', label: 'Revenue Generated' },
-      { metric: '10X', label: 'Return on Ad Spend' },
-      { metric: 'Top 3', label: 'Google Rankings' },
-    ],
-    services: ['Google Ads', 'Shopping Campaigns', 'SEO'],
-    slug: 'ut-sarees',
-    published: true,
-  },
-  {
-    id: '2',
-    client: 'The Usee Shop',
-    industry: 'E-Commerce / Banarasi Silk',
-    headline: 'First-Page Ranking for Competitive Keywords',
-    description:
-      'The Usee Shop came to us struggling with visibility in a highly competitive niche. Our comprehensive SEO strategy achieved first-page ranking for "banarasi silk tissue saree" and drove significant organic sales growth.',
-    results: [
-      { metric: '#1 Page', label: 'Google Ranking' },
-      { metric: '300%+', label: 'Organic Traffic Growth' },
-      { metric: 'Significant', label: 'Sales Increase' },
-    ],
-    services: ['SEO', 'Content Strategy', 'On-Page Optimization'],
-    slug: 'the-usee-shop',
-    published: true,
-  },
-  {
-    id: '3',
-    client: 'E-Commerce Client',
-    industry: 'E-Commerce',
-    headline: '₹30 Lakh in Sales with 14X ROAS',
-    description:
-      'Through precise website-ad alignment and continuous optimization, we helped this e-commerce brand achieve remarkable returns.',
-    results: [
-      { metric: '₹30 Lakh', label: 'Total Sales' },
-      { metric: '14X', label: 'Return on Ad Spend' },
-      { metric: '60%', label: 'Lower CPA' },
-    ],
-    services: ['Google Ads', 'Landing Pages', 'Conversion Optimization'],
-    slug: 'e-commerce-client',
-    published: true,
-  },
-];
-
 const cardColors = [
   { color: 'from-blue-500/20 to-purple-500/20', accent: '#4F8CFF' },
   { color: 'from-amber-500/20 to-rose-500/20', accent: '#C8A96A' },
@@ -78,27 +27,27 @@ const cardColors = [
 export default function FeaturedWork() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
-  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>(fallbackCaseStudies);
+  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch latest 5 case studies
+  // Fetch latest 5 case studies immediately on mount
   useEffect(() => {
-    const doFetch = () => {
-      fetch('/api/case-studies')
-        .then((res) => res.json())
-        .then((data: CaseStudy[]) => {
-          const published = data.filter((cs) => cs.published);
-          if (published.length > 0) setCaseStudies(published.slice(0, 5));
-        })
-        .catch(() => {});
-    };
+    let active = true;
 
-    if ('requestIdleCallback' in window) {
-      const id = (window as unknown as { requestIdleCallback: (cb: () => void) => number }).requestIdleCallback(doFetch);
-      return () => (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(id);
-    } else {
-      const timer = setTimeout(doFetch, 2000);
-      return () => clearTimeout(timer);
-    }
+    fetch('/api/case-studies')
+      .then((res) => res.json())
+      .then((data: CaseStudy[]) => {
+        if (!active) return;
+        setCaseStudies(data.filter((cs) => cs.published).slice(0, 5));
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   // GSAP ScrollTrigger horizontal scroll with pin
@@ -170,6 +119,11 @@ export default function FeaturedWork() {
     };
   }, [caseStudies]);
 
+  // No published case studies yet — hide the section entirely
+  if (!loading && caseStudies.length === 0) {
+    return null;
+  }
+
   return (
     <section ref={sectionRef} id="work" className="relative bg-[#0a0a0a]" style={{ zIndex: 1 }}>
       {/* Desktop: pinned horizontal scroll */}
@@ -214,16 +168,22 @@ export default function FeaturedWork() {
 
         {/* Horizontal cards */}
         <div ref={cardsRef} className="flex gap-8 px-6 py-6 w-max items-start" style={{ willChange: 'transform' }}>
-          {caseStudies.map((study, i) => (
-            <Link
-              key={study.id}
-              href={`/case-studies/${study.slug}`}
-              className="project-card min-w-[500px] lg:min-w-[600px] group block"
-              data-cursor="pointer"
-            >
-              <ProjectCard study={study} index={i} />
-            </Link>
-          ))}
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="min-w-[500px] lg:min-w-[600px]">
+                  <ProjectSkeleton />
+                </div>
+              ))
+            : caseStudies.map((study, i) => (
+                <Link
+                  key={study.id}
+                  href={`/case-studies/${study.slug}`}
+                  className="project-card min-w-[500px] lg:min-w-[600px] group block"
+                  data-cursor="pointer"
+                >
+                  <ProjectCard study={study} index={i} />
+                </Link>
+              ))}
           <div className="w-[10vw] shrink-0" />
         </div>
       </div>
@@ -248,19 +208,23 @@ export default function FeaturedWork() {
           </h2>
         </div>
         <div className="space-y-4">
-          {caseStudies.map((study, i) => (
-            <motion.div
-              key={study.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-            >
-              <Link href={`/case-studies/${study.slug}`} className="block">
-                <ProjectCard study={study} index={i} />
-              </Link>
-            </motion.div>
-          ))}
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <ProjectSkeleton key={i} />
+              ))
+            : caseStudies.map((study, i) => (
+                <motion.div
+                  key={study.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                >
+                  <Link href={`/case-studies/${study.slug}`} className="block">
+                    <ProjectCard study={study} index={i} />
+                  </Link>
+                </motion.div>
+              ))}
         </div>
         <div className="text-center mt-8">
           <Link
@@ -319,6 +283,35 @@ function ProjectCard({ study, index }: { study: CaseStudy; index: number }) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProjectSkeleton() {
+  return (
+    <div className="relative rounded-2xl overflow-hidden glass skeleton-shimmer h-[45vh] max-h-[400px] md:h-[55vh] md:max-h-none flex flex-col justify-end">
+      {/* Industry tag (top-right) */}
+      <div className="absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-2">
+        <div className="skeleton-block h-2 w-2 rounded-full" />
+        <div className="skeleton-block h-3 w-28" />
+      </div>
+
+      <div className="relative z-10 p-5 sm:p-8">
+        <div className="skeleton-block h-3 w-24 mb-3" />
+        {/* Client name */}
+        <div className="skeleton-block h-9 w-3/5 mb-3" />
+        {/* Headline */}
+        <div className="skeleton-block h-5 w-2/3 mb-3" />
+        {/* Description */}
+        <div className="skeleton-block h-3 w-full mb-2" />
+        <div className="skeleton-block h-3 w-4/5 mb-4" />
+
+        {/* Results row */}
+        <div className="flex gap-4">
+          <div className="skeleton-block h-4 w-32" />
+          <div className="skeleton-block h-4 w-28" />
         </div>
       </div>
     </div>

@@ -39,46 +39,6 @@ const categoryGradients: Record<string, string> = {
   General: 'from-indigo-500/20 to-blue-500/20',
 };
 
-// Fallback blog posts so initial render is meaningful (no loading skeleton)
-const fallbackPosts: BlogPost[] = [
-  {
-    id: '1',
-    title: 'The Future of Digital Marketing in 2026',
-    slug: 'future-of-digital-marketing-2026',
-    excerpt: 'Explore the trends shaping digital marketing this year — from AI-driven personalization to immersive brand experiences.',
-    content: '',
-    category: 'Strategy',
-    author: 'Kreative Catalyst',
-    date: '2026-04-20',
-    readTime: '5 min read',
-    published: true,
-  },
-  {
-    id: '2',
-    title: 'Why SEO Still Matters for Small Businesses',
-    slug: 'why-seo-still-matters',
-    excerpt: 'Search engine optimization remains one of the highest-ROI channels for small businesses. Here\'s why you shouldn\'t ignore it.',
-    content: '',
-    category: 'Strategy',
-    author: 'Kreative Catalyst',
-    date: '2026-04-10',
-    readTime: '4 min read',
-    published: true,
-  },
-  {
-    id: '3',
-    title: 'Building a Brand Identity That Lasts',
-    slug: 'building-brand-identity',
-    excerpt: 'A strong brand identity goes beyond a logo. Learn the key elements that make a brand memorable and trustworthy.',
-    content: '',
-    category: 'Branding',
-    author: 'Kreative Catalyst',
-    date: '2026-03-28',
-    readTime: '6 min read',
-    published: true,
-  },
-];
-
 const PAGE_SIZE = 6;
 
 interface BlogProps {
@@ -90,39 +50,30 @@ interface BlogProps {
 export default function Blog({ paginated = false }: BlogProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
-  const [posts, setPosts] = useState<BlogPost[]>(fallbackPosts);
-  const [loading] = useState(false);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  // Defer API fetch until section is near viewport
+  // Fetch published posts immediately on mount so the newest blogs show fast
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    let active = true;
 
-    let fetched = false;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !fetched) {
-          fetched = true;
-          observer.disconnect();
-          fetch('/api/blog')
-            .then((res) => fetchJson<BlogPost[]>(res))
-            .then((data: BlogPost[]) => {
-              const published = data.filter((p) => p.published);
-              if (published.length > 0) {
-                setPosts(published);
-              }
-            })
-            .catch(() => {
-              // Keep fallback data
-            });
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    observer.observe(section);
+    fetch('/api/blog')
+      .then((res) => fetchJson<BlogPost[]>(res))
+      .then((data: BlogPost[]) => {
+        if (!active) return;
+        setPosts(data.filter((p) => p.published));
+      })
+      .catch(() => {
+        // Leave posts empty; the empty-state message handles this
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-    return () => observer.disconnect();
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Homepage preview always caps at one batch; the /blog page reveals posts
@@ -179,11 +130,37 @@ export default function Blog({ paginated = false }: BlogProps) {
         {/* Blog grid */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="glass rounded-2xl h-[320px] animate-pulse"
-              />
+                className="glass skeleton-shimmer rounded-2xl overflow-hidden h-[320px] flex flex-col"
+              >
+                {/* Gradient header bar */}
+                <div className="h-1 bg-gradient-to-r from-accent-blue/20 to-violet-500/20" />
+
+                <div className="p-4 sm:p-6 md:p-8 flex flex-col flex-1">
+                  {/* Category & read time row */}
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="skeleton-block h-6 w-24 rounded-full" />
+                    <div className="skeleton-block h-3 w-16" />
+                  </div>
+
+                  {/* Title lines */}
+                  <div className="skeleton-block h-5 w-11/12 mb-2.5" />
+                  <div className="skeleton-block h-5 w-3/4 mb-5" />
+
+                  {/* Excerpt lines */}
+                  <div className="skeleton-block h-3 w-full mb-2" />
+                  <div className="skeleton-block h-3 w-full mb-2" />
+                  <div className="skeleton-block h-3 w-2/3 mb-6" />
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-4 mt-auto border-t border-dark-700/30">
+                    <div className="skeleton-block h-3 w-20" />
+                    <div className="skeleton-block h-3 w-16" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : posts.length === 0 ? (

@@ -23,73 +23,28 @@ interface CaseStudy {
   published: boolean;
 }
 
-const fallbackCaseStudies: CaseStudy[] = [
-  {
-    id: '1',
-    client: 'UT Sarees',
-    industry: 'E-Commerce / Fashion',
-    headline: 'From Zero to \u20B950 Lacs Revenue',
-    description:
-      'We partnered with UT Sarees to build and scale their online presence from scratch. Through strategic Google Search and Shopping campaigns combined with meticulous keyword targeting, we delivered exceptional results that transformed their business. Our team identified high-intent buyer keywords, optimized product feeds for Google Shopping, and continuously refined bidding strategies to maximize every rupee of ad spend.',
-    results: [
-      { metric: '\u20B950 Lacs', label: 'Revenue Generated' },
-      { metric: '10X', label: 'Return on Ad Spend' },
-      { metric: 'Top 3', label: 'Google Rankings' },
-    ],
-    services: ['Google Ads', 'Shopping Campaigns', 'SEO'],
-    slug: 'ut-sarees',
-    published: true,
-  },
-  {
-    id: '2',
-    client: 'The Usee Shop',
-    industry: 'E-Commerce / Banarasi Silk',
-    headline: 'First-Page Ranking for Competitive Keywords',
-    description:
-      'The Usee Shop came to us struggling with visibility in a highly competitive niche. Our comprehensive SEO strategy achieved first-page ranking for "banarasi silk tissue saree" and drove significant organic sales growth. We conducted deep competitor analysis, restructured their website content around high-value keywords, built authoritative backlinks, and optimized their product pages for both search engines and conversions.',
-    results: [
-      { metric: '#1 Page', label: 'Google Ranking' },
-      { metric: '300%+', label: 'Organic Traffic Growth' },
-      { metric: 'Significant', label: 'Sales Increase' },
-    ],
-    services: ['SEO', 'Content Strategy', 'On-Page Optimization'],
-    slug: 'the-usee-shop',
-    published: true,
-  },
-  {
-    id: '3',
-    client: 'E-Commerce Client',
-    industry: 'E-Commerce',
-    headline: '\u20B930 Lakh in Sales with 14X ROAS',
-    description:
-      'Through precise website-ad alignment and continuous optimization, we helped this e-commerce brand achieve remarkable returns. Our approach combined landing page optimization with targeted Meta ad campaigns for maximum conversion. By aligning the website experience with ad messaging, refining audience segments, and implementing systematic A/B testing, we reduced cost per acquisition by 60% while scaling total sales volume significantly.',
-    results: [
-      { metric: '\u20B930 Lakh', label: 'Total Sales' },
-      { metric: '14X', label: 'Return on Ad Spend' },
-      { metric: '60%', label: 'Lower CPA' },
-    ],
-    services: ['Google Ads', 'Landing Pages', 'Conversion Optimization'],
-    slug: 'e-commerce-client',
-    published: true,
-  },
-];
-
 export default function CaseStudiesPage() {
   const pageRef = useRef<HTMLDivElement>(null);
-  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>(fallbackCaseStudies);
+  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
+
     fetch('/api/case-studies')
       .then((res) => res.json())
       .then((data: CaseStudy[]) => {
-        const published = data.filter((cs) => cs.published);
-        if (published.length > 0) {
-          setCaseStudies(published);
-        }
+        if (!active) return;
+        setCaseStudies(data.filter((cs) => cs.published));
       })
-      .catch(() => {
-        // Use fallback data
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoading(false);
       });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -180,6 +135,36 @@ export default function CaseStudiesPage() {
               </h2>
             </motion.div>
 
+            {loading ? (
+              <div className="space-y-8">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="glass skeleton-shimmer rounded-2xl p-6 sm:p-10 overflow-hidden"
+                  >
+                    <div className="skeleton-block h-3 w-32 mb-5" />
+                    <div className="skeleton-block h-8 w-1/2 mb-3" />
+                    <div className="skeleton-block h-5 w-2/3 mb-5" />
+                    <div className="skeleton-block h-3 w-full mb-2" />
+                    <div className="skeleton-block h-3 w-11/12 mb-8" />
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-4 mb-6">
+                      {Array.from({ length: 3 }).map((_, j) => (
+                        <div key={j} className="skeleton-block h-16 rounded-xl" />
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.from({ length: 3 }).map((_, j) => (
+                        <div key={j} className="skeleton-block h-6 w-24 rounded-full" />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : caseStudies.length === 0 ? (
+              <div className="text-center py-16 text-light-300/40">
+                No case studies published yet. Check back soon.
+              </div>
+            ) : (
             <div className="case-studies-grid space-y-8">
               {caseStudies.map((study) => (
                 <Link key={study.id} href={`/case-studies/${study.slug}`} className="block case-study-card">
@@ -216,6 +201,7 @@ export default function CaseStudiesPage() {
                 </Link>
               ))}
             </div>
+            )}
           </div>
         </section>
 

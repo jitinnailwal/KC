@@ -17,63 +17,6 @@ interface Review {
   image?: string;
 }
 
-const fallbackTestimonials: Review[] = [
-  {
-    id: '1',
-    quote: 'Kreative Catalyst transformed our brand from forgettable to iconic. Their attention to detail and strategic thinking is unmatched.',
-    name: 'Sarah Chen',
-    role: 'CEO, Lumière Finance',
-    rating: 5,
-    published: true,
-    date: '2026-04-15',
-  },
-  {
-    id: '2',
-    quote: 'Working with KC was like having a creative partner who truly understands the intersection of design and business impact.',
-    name: 'Marcus Rivera',
-    role: 'Founder, Noir Fashion',
-    rating: 5,
-    published: true,
-    date: '2026-04-10',
-  },
-  {
-    id: '3',
-    quote: "They don't just build websites — they craft experiences. Our conversion rate tripled after the redesign.",
-    name: 'Emily Zhang',
-    role: 'CMO, Zenith Health',
-    rating: 5,
-    published: true,
-    date: '2026-03-28',
-  },
-  {
-    id: '4',
-    quote: 'The level of creativity and technical excellence is rare. Kreative Catalyst delivered beyond our wildest expectations.',
-    name: 'David Park',
-    role: 'CTO, NovaTech',
-    rating: 5,
-    published: true,
-    date: '2026-03-15',
-  },
-  {
-    id: '5',
-    quote: 'From brand strategy to final launch, every step was handled with precision. A truly world-class creative studio.',
-    name: 'Aisha Patel',
-    role: 'VP Marketing, Solaris',
-    rating: 5,
-    published: true,
-    date: '2026-02-20',
-  },
-  {
-    id: '6',
-    quote: 'Our entire digital presence was elevated. The ROI on their work paid for itself within the first quarter.',
-    name: 'James Walker',
-    role: 'Director, Apex Ventures',
-    rating: 5,
-    published: true,
-    date: '2026-02-05',
-  },
-];
-
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -87,34 +30,27 @@ export default function Testimonials() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
-  const [testimonials, setTestimonials] = useState<Review[]>(fallbackTestimonials);
+  const [testimonials, setTestimonials] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch latest 7 reviews
+  // Fetch latest 7 reviews immediately on mount
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+    let active = true;
 
-    let fetched = false;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !fetched) {
-          fetched = true;
-          observer.disconnect();
-          fetch('/api/reviews')
-            .then((res) => fetchJson<Review[]>(res))
-            .then((data: Review[]) => {
-              const published = data.filter((r) => r.published);
-              if (published.length > 0) {
-                setTestimonials(published.slice(0, 7));
-              }
-            })
-            .catch(() => {});
-        }
-      },
-      { rootMargin: '400px' }
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
+    fetch('/api/reviews')
+      .then((res) => fetchJson<Review[]>(res))
+      .then((data: Review[]) => {
+        if (!active) return;
+        setTestimonials(data.filter((r) => r.published).slice(0, 7));
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   // GSAP ScrollTrigger horizontal scroll with pin
@@ -186,6 +122,11 @@ export default function Testimonials() {
     };
   }, [testimonials]);
 
+  // No published reviews yet — hide the section entirely
+  if (!loading && testimonials.length === 0) {
+    return null;
+  }
+
   return (
     <section ref={sectionRef} className="relative bg-[#0a0a0a]" style={{ zIndex: 2 }}>
       {/* Desktop: pinned horizontal scroll */}
@@ -247,14 +188,20 @@ export default function Testimonials() {
           className="flex gap-6 lg:gap-8 px-6 py-8 w-max"
           style={{ willChange: 'transform' }}
         >
-          {testimonials.map((testimonial, i) => (
-            <div
-              key={testimonial.id}
-              className="testimonial-card w-[500px] lg:w-[600px] shrink-0"
-            >
-              <TestimonialCard testimonial={testimonial} index={i} />
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="w-[500px] lg:w-[600px] shrink-0">
+                  <TestimonialSkeleton />
+                </div>
+              ))
+            : testimonials.map((testimonial, i) => (
+                <div
+                  key={testimonial.id}
+                  className="testimonial-card w-[500px] lg:w-[600px] shrink-0"
+                >
+                  <TestimonialCard testimonial={testimonial} index={i} />
+                </div>
+              ))}
           <div className="w-[10vw] shrink-0" />
         </div>
       </div>
@@ -288,17 +235,21 @@ export default function Testimonials() {
           </div>
         </div>
         <div className="px-4 py-6 space-y-4">
-          {testimonials.map((testimonial, i) => (
-            <motion.div
-              key={testimonial.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-            >
-              <TestimonialCard testimonial={testimonial} index={i} />
-            </motion.div>
-          ))}
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <TestimonialSkeleton key={i} />
+              ))
+            : testimonials.map((testimonial, i) => (
+                <motion.div
+                  key={testimonial.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                >
+                  <TestimonialCard testimonial={testimonial} index={i} />
+                </motion.div>
+              ))}
         </div>
       </div>
     </section>
@@ -350,6 +301,37 @@ function TestimonialCard({ testimonial, index }: { testimonial: Review; index: n
         </div>
         <div className="ml-auto text-3xl md:text-4xl font-heading font-bold text-dark-700/20 select-none">
           {String(index + 1).padStart(2, '0')}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TestimonialSkeleton() {
+  return (
+    <div className="glass skeleton-shimmer rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-8 h-full flex flex-col justify-between overflow-hidden">
+      <div>
+        {/* Quote icon + stars row */}
+        <div className="flex items-center justify-between mb-4 md:mb-6">
+          <div className="skeleton-block h-8 w-8 md:h-10 md:w-10 rounded-lg" />
+          <div className="flex gap-1">
+            {Array.from({ length: 5 }).map((_, j) => (
+              <div key={j} className="skeleton-block h-3 w-3 rounded-sm" />
+            ))}
+          </div>
+        </div>
+        {/* Quote lines */}
+        <div className="skeleton-block h-4 w-full mb-3" />
+        <div className="skeleton-block h-4 w-full mb-3" />
+        <div className="skeleton-block h-4 w-4/5 mb-6 md:mb-8" />
+      </div>
+
+      {/* Footer: avatar + name */}
+      <div className="flex items-center gap-3 md:gap-4 pt-4 md:pt-5 border-t border-dark-700/30">
+        <div className="skeleton-block h-9 w-9 md:h-11 md:w-11 rounded-full shrink-0" />
+        <div className="flex-1">
+          <div className="skeleton-block h-3.5 w-32 mb-2" />
+          <div className="skeleton-block h-3 w-24" />
         </div>
       </div>
     </div>
