@@ -6,6 +6,7 @@ import { getSeoMeta } from '@/lib/getSeoMeta';
 const fallback: Metadata = {
   title: 'SEO Services | Kreative Catalyst',
   description: 'We help your business rank higher on Google through proven SEO strategies. From keyword research to technical audits, we ensure your website attracts organic traffic that converts into leads and sales.',
+  alternates: { canonical: 'https://kreativecatalyst.in/services/seo-services' },
   openGraph: {
     title: 'SEO Services | Kreative Catalyst',
     description: 'Rank higher on Google with proven SEO strategies. Keyword research, technical audits, and organic traffic that converts.',
@@ -15,7 +16,7 @@ const fallback: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoMeta('/services/seo-services');
-  return seo.title ? seo : fallback;
+  return { ...fallback, ...seo };
 }
 
 const data: ServicePageData = {

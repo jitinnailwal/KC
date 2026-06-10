@@ -6,6 +6,7 @@ import { getSeoMeta } from '@/lib/getSeoMeta';
 const fallback: Metadata = {
   title: 'Social Media Marketing | Kreative Catalyst',
   description: "Turn likes, shares, and hashtags into leads, sales, and success. Scroll-stopping content and ROI-driven campaigns that make your competition wish they'd hired us first.",
+  alternates: { canonical: 'https://kreativecatalyst.in/services/social-media-marketing' },
   openGraph: {
     title: 'Social Media Marketing | Kreative Catalyst',
     description: 'Scroll-stopping content and ROI-driven social media campaigns that turn engagement into real business results.',
@@ -15,7 +16,7 @@ const fallback: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoMeta('/services/social-media-marketing');
-  return seo.title ? seo : fallback;
+  return { ...fallback, ...seo };
 }
 
 const data: ServicePageData = {

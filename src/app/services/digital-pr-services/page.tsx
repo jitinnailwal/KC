@@ -6,6 +6,7 @@ import { getSeoMeta } from '@/lib/getSeoMeta';
 const fallback: Metadata = {
   title: 'Digital PR | Kreative Catalyst',
   description: 'Build visibility, authority, and credibility through strategic media outreach. Get your brand seen, mentioned, and trusted on publications and industry platforms.',
+  alternates: { canonical: 'https://kreativecatalyst.in/services/digital-pr-services' },
   openGraph: {
     title: 'Digital PR | Kreative Catalyst',
     description: 'Build brand visibility, authority, and credibility through strategic media outreach and digital PR.',
@@ -15,7 +16,7 @@ const fallback: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoMeta('/services/digital-pr-services');
-  return seo.title ? seo : fallback;
+  return { ...fallback, ...seo };
 }
 
 const data: ServicePageData = {

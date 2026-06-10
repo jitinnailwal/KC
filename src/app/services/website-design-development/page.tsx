@@ -6,6 +6,7 @@ import { getSeoMeta } from '@/lib/getSeoMeta';
 const fallback: Metadata = {
   title: 'Website Design & Development | Kreative Catalyst',
   description: 'We build high-converting, fast, mobile-friendly websites designed for business growth — Shopify stores, WordPress sites, landing pages, or complete ecommerce setups.',
+  alternates: { canonical: 'https://kreativecatalyst.in/services/website-design-development' },
   openGraph: {
     title: 'Website Design & Development | Kreative Catalyst',
     description: 'High-converting, fast, mobile-friendly websites designed for business growth. Shopify, WordPress, landing pages, and ecommerce.',
@@ -15,7 +16,7 @@ const fallback: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoMeta('/services/website-design-development');
-  return seo.title ? seo : fallback;
+  return { ...fallback, ...seo };
 }
 
 const data: ServicePageData = {

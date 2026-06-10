@@ -6,6 +6,7 @@ import { getSeoMeta } from '@/lib/getSeoMeta';
 const fallback: Metadata = {
   title: 'Google Ads | Kreative Catalyst',
   description: "Looking for instant results? Our Google Ads strategies boost traffic, leads, and sales faster than you can say 'Click-Through Rate.' Let's put your brand on top where it belongs.",
+  alternates: { canonical: 'https://kreativecatalyst.in/services/google-ads-services' },
   openGraph: {
     title: 'Google Ads | Kreative Catalyst',
     description: 'Google Ads strategies that boost traffic, leads, and sales. Put your brand on top where it belongs.',
@@ -15,7 +16,7 @@ const fallback: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoMeta('/services/google-ads-services');
-  return seo.title ? seo : fallback;
+  return { ...fallback, ...seo };
 }
 
 const data: ServicePageData = {

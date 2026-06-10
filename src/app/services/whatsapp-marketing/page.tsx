@@ -6,6 +6,7 @@ import { getSeoMeta } from '@/lib/getSeoMeta';
 const fallback: Metadata = {
   title: 'WhatsApp Marketing | Kreative Catalyst',
   description: 'Turn WhatsApp into a serious revenue channel. Real conversations, real leads, real sales. No spam, no guesswork — just results-driven WhatsApp marketing.',
+  alternates: { canonical: 'https://kreativecatalyst.in/services/whatsapp-marketing' },
   openGraph: {
     title: 'WhatsApp Marketing | Kreative Catalyst',
     description: 'Turn WhatsApp into a revenue channel with real conversations, real leads, and real sales. No spam, no guesswork.',
@@ -15,7 +16,7 @@ const fallback: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoMeta('/services/whatsapp-marketing');
-  return seo.title ? seo : fallback;
+  return { ...fallback, ...seo };
 }
 
 const data: ServicePageData = {

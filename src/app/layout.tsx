@@ -31,6 +31,7 @@ const fallbackMetadata: Metadata = {
   title: "Kreative Catalyst | Digital Marketing Agency",
   description: "Your Online Presence Deserves the Best. SEO, Social Media Marketing, Google Ads, Content Marketing, WhatsApp Marketing & Website Development.",
   metadataBase: new URL("https://kreativecatalyst.in"),
+  alternates: { canonical: "https://kreativecatalyst.in" },
   openGraph: {
     title: "Kreative Catalyst | Digital Marketing Agency",
     description: "SEO, Social Media Marketing, Google Ads, Content Marketing, WhatsApp Marketing & Website Development.",
@@ -52,10 +53,7 @@ const fallbackMetadata: Metadata = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoMeta('/');
-  if (seo.title) {
-    return { ...fallbackMetadata, ...seo };
-  }
-  return fallbackMetadata;
+  return { ...fallbackMetadata, ...seo };
 }
 
 const jsonLd = {
