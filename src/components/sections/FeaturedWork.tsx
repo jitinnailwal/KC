@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import AnimatedText from '@/components/ui/AnimatedText';
 
 interface CaseStudy {
@@ -13,6 +14,7 @@ interface CaseStudy {
   description: string;
   results: { metric: string; label: string }[];
   services: string[];
+  coverImage?: string;
   slug: string;
   published: boolean;
 }
@@ -247,6 +249,18 @@ function ProjectCard({ study, index }: { study: CaseStudy; index: number }) {
 
   return (
     <div className="relative rounded-2xl overflow-hidden glass h-[45vh] max-h-[400px] md:h-[55vh] md:max-h-none flex flex-col justify-end group">
+      {study.coverImage && (
+        <Image
+          src={study.coverImage}
+          alt={study.client}
+          fill
+          sizes="(max-width: 768px) 100vw, 600px"
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+      )}
+      {study.coverImage && (
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+      )}
       <div className={`absolute inset-0 bg-gradient-to-br ${colorScheme.color} opacity-30 group-hover:opacity-50 transition-opacity duration-700`} />
 
       <div className="absolute top-4 sm:top-6 right-4 sm:right-6 flex items-center gap-2">

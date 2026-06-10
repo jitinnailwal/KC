@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AnimatedText from '@/components/ui/AnimatedText';
@@ -167,35 +168,51 @@ export default function CaseStudiesPage() {
             ) : (
             <div className="case-studies-grid space-y-8">
               {caseStudies.map((study) => (
-                <Link key={study.id} href={`/case-studies/${study.slug}`} className="block case-study-card">
+                <Link key={study.id} href={`/case-studies/${study.slug}`} className="group block case-study-card">
                   <GlassCard className="p-6 sm:p-10 hover:border-accent-blue/20 transition-all duration-300 cursor-pointer">
-                    <div className="flex flex-wrap items-center gap-3 mb-4">
-                      <span className="text-accent-gold text-xs font-medium tracking-wider uppercase">{study.industry}</span>
-                    </div>
-
-                    <h3 className="font-heading font-bold text-2xl md:text-3xl mb-2">{study.client}</h3>
-                    <p className="text-lg text-accent-blue font-medium mb-4">{study.headline}</p>
-                    <p className="text-light-300/60 leading-relaxed mb-8 max-w-3xl">{study.description}</p>
-
-                    {/* Results */}
-                    <div className="grid grid-cols-3 gap-1.5 sm:gap-4 mb-6">
-                      {study.results.map((result) => (
-                        <div key={result.label} className="text-center glass rounded-xl px-1.5 py-3 sm:p-4">
-                          <div className="text-xs sm:text-2xl md:text-3xl font-heading font-bold text-gradient mb-1 leading-tight">
-                            {result.metric}
-                          </div>
-                          <div className="text-[11px] sm:text-xs text-light-300/50 leading-tight">{result.label}</div>
+                    <div className={`flex flex-col gap-6 lg:gap-10 ${study.coverImage ? 'lg:flex-row lg:items-center' : ''}`}>
+                      <div className={study.coverImage ? 'lg:flex-1 lg:min-w-0' : ''}>
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                          <span className="text-accent-gold text-xs font-medium tracking-wider uppercase">{study.industry}</span>
                         </div>
-                      ))}
-                    </div>
 
-                    {/* Services used */}
-                    <div className="flex flex-wrap gap-2">
-                      {study.services.map((svc) => (
-                        <span key={svc} className="px-3 py-1 rounded-full text-xs text-light-300/50 border border-dark-700/50">
-                          {svc}
-                        </span>
-                      ))}
+                        <h3 className="font-heading font-bold text-2xl md:text-3xl mb-2">{study.client}</h3>
+                        <p className="text-lg text-accent-blue font-medium mb-4">{study.headline}</p>
+                        <p className="text-light-300/60 leading-relaxed mb-8 max-w-3xl">{study.description}</p>
+
+                        {/* Results */}
+                        <div className="grid grid-cols-3 gap-1.5 sm:gap-4 mb-6">
+                          {study.results.map((result) => (
+                            <div key={result.label} className="text-center glass rounded-xl px-1.5 py-3 sm:p-4">
+                              <div className="text-xs sm:text-2xl md:text-3xl font-heading font-bold text-gradient mb-1 leading-tight">
+                                {result.metric}
+                              </div>
+                              <div className="text-[11px] sm:text-xs text-light-300/50 leading-tight">{result.label}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Services used */}
+                        <div className="flex flex-wrap gap-2">
+                          {study.services.map((svc) => (
+                            <span key={svc} className="px-3 py-1 rounded-full text-xs text-light-300/50 border border-dark-700/50">
+                              {svc}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {study.coverImage && (
+                        <div className="relative w-full lg:w-2/5 lg:shrink-0 aspect-video rounded-xl overflow-hidden border border-dark-700/30">
+                          <Image
+                            src={study.coverImage}
+                            alt={study.client}
+                            fill
+                            sizes="(max-width: 1024px) 100vw, 460px"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                      )}
                     </div>
                   </GlassCard>
                 </Link>
