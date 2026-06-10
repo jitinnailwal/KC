@@ -116,15 +116,26 @@ export default function Blog({ paginated = false }: BlogProps) {
               </span>
             </h2>
           </div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-light-300/60 max-w-md text-sm"
-          >
-            Thoughts on design, development, and the creative process.
-            Fresh insights published regularly.
-          </motion.p>
+          <div className="flex flex-col items-start md:items-end gap-3">
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="text-light-300/60 max-w-md text-sm"
+            >
+              Thoughts on design, development, and the creative process.
+              Fresh insights published regularly.
+            </motion.p>
+            {!paginated && (
+              <Link
+                href="/blog"
+                className="hidden md:inline-block text-accent-blue text-sm font-medium hover:underline transition-all"
+                data-cursor="pointer"
+              >
+                View All Blogs →
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Blog grid */}
@@ -273,6 +284,22 @@ export default function Blog({ paginated = false }: BlogProps) {
                 </motion.div>
               );
             })}
+          </div>
+        )}
+
+        {/* View All Blogs — homepage only, mobile */}
+        {!paginated && !loading && posts.length > 0 && (
+          <div className="md:hidden text-center mt-8">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-accent-blue/30 text-accent-blue text-sm font-medium hover:bg-accent-blue/5 transition-all duration-300"
+              data-cursor="pointer"
+            >
+              View All Blogs
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
           </div>
         )}
 

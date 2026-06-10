@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from '@/components/layout/Navbar';
@@ -97,18 +98,18 @@ const keyStrengths = [
 ];
 
 const countries = [
-  { name: 'UAE', flag: '🇦🇪' },
-  { name: 'UK', flag: '🇬🇧' },
+  { name: 'UAE', flag: '🇦🇪', href: '/locations/uae' },
+  { name: 'UK', flag: '🇬🇧', href: '/locations/uk' },
   {
     name: 'India',
     flag: '🇮🇳',
     cities: [
-      { city: 'Varanasi', label: 'Digital Marketing Agency in Varanasi' },
-      { city: 'Bangalore', label: 'Digital Marketing Agency in Bangalore' },
-      { city: 'Delhi', label: 'Digital Marketing Agency in Delhi' },
+      { city: 'Varanasi', label: 'Digital Marketing Agency in Varanasi', href: '/locations/varanasi' },
+      { city: 'Bangalore', label: 'Digital Marketing Agency in Bangalore', href: '/locations/bengaluru' },
+      { city: 'Delhi', label: 'Digital Marketing Agency in Delhi', href: '/locations/delhi' },
     ],
   },
-  { name: 'USA', flag: '🇺🇸' },
+  { name: 'USA', flag: '🇺🇸', href: '/locations/usa' },
 ];
 
 function LocationsSection() {
@@ -136,29 +137,39 @@ function LocationsSection() {
             const hasDropdown = 'cities' in country && country.cities;
             const isExpanded = expandedCountry === country.name;
 
+            const card = (
+              <GlassCard
+                className={`p-6 text-center group transition-all duration-300 ${hasDropdown ? 'cursor-pointer' : ''} ${isExpanded ? 'border-accent-blue/30' : 'hover:border-accent-blue/20'}`}
+                onClick={hasDropdown ? () => setExpandedCountry(isExpanded ? null : country.name) : undefined}
+              >
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl glass mb-4 text-accent-blue group-hover:text-accent-gold transition-colors">
+                  <span className="text-3xl">{country.flag}</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <h3 className="font-heading font-bold text-xl">{country.name}</h3>
+                  {hasDropdown && (
+                    <motion.svg
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                      width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                      className="text-light-300/50"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </motion.svg>
+                  )}
+                </div>
+              </GlassCard>
+            );
+
             return (
               <div key={country.name} className="flex flex-col">
-                <GlassCard
-                  className={`p-6 text-center group transition-all duration-300 ${hasDropdown ? 'cursor-pointer' : ''} ${isExpanded ? 'border-accent-blue/30' : 'hover:border-accent-blue/20'}`}
-                  onClick={hasDropdown ? () => setExpandedCountry(isExpanded ? null : country.name) : undefined}
-                >
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl glass mb-4 text-accent-blue group-hover:text-accent-gold transition-colors">
-                    <span className="text-3xl">{country.flag}</span>
-                  </div>
-                  <div className="flex items-center justify-center gap-2">
-                    <h3 className="font-heading font-bold text-xl">{country.name}</h3>
-                    {hasDropdown && (
-                      <motion.svg
-                        animate={{ rotate: isExpanded ? 180 : 0 }}
-                        transition={{ duration: 0.25 }}
-                        width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                        className="text-light-300/50"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </motion.svg>
-                    )}
-                  </div>
-                </GlassCard>
+                {'href' in country && country.href ? (
+                  <Link href={country.href} className="block" data-cursor="pointer">
+                    {card}
+                  </Link>
+                ) : (
+                  card
+                )}
 
                 {/* Expandable cities dropdown */}
                 {hasDropdown && (
@@ -173,19 +184,21 @@ function LocationsSection() {
                       >
                         <div className="pt-3 space-y-2">
                           {country.cities!.map((city) => (
-                            <div
+                            <Link
                               key={city.city}
+                              href={city.href}
                               className="glass rounded-xl px-4 py-3 flex items-center gap-3 group/city hover:border-accent-blue/20 transition-all duration-300"
+                              data-cursor="pointer"
                             >
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-accent-blue/60 shrink-0">
                                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                                 <circle cx="12" cy="10" r="3" />
                               </svg>
                               <div>
-                                <span className="text-sm font-medium text-light-300">{city.city}</span>
+                                <span className="text-sm font-medium text-light-300 group-hover/city:text-light transition-colors">{city.city}</span>
                                 <p className="text-xs text-light-300/40">{city.label}</p>
                               </div>
-                            </div>
+                            </Link>
                           ))}
                         </div>
                       </motion.div>

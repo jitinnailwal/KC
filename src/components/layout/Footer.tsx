@@ -55,12 +55,21 @@ const footerLinks = {
     { name: 'Contact', href: '/contact' },
   ],
   'Locations We Serve': [
-    { name: 'India', href: '' },
-    { name: 'UK', href: '' },
-    { name: 'USA', href: '' },
-    { name: 'UAE', href: '' },
+    { name: 'Delhi', href: '/locations/delhi' },
+    { name: 'Varanasi', href: '/locations/varanasi' },
+    { name: 'Bangalore', href: '/locations/bengaluru' },
+    { name: 'UK', href: '/locations/uk' },
+    { name: 'USA', href: '/locations/usa' },
+    { name: 'UAE', href: '/locations/uae' },
   ],
 };
+
+const countryChips = [
+  { name: 'India', href: '' },
+  { name: 'UK', href: '/locations/uk' },
+  { name: 'USA', href: '/locations/usa' },
+  { name: 'UAE', href: '/locations/uae' },
+];
 
 export default function Footer() {
   return (
@@ -111,11 +120,22 @@ export default function Footer() {
 
             {/* Locations */}
             <div className="flex flex-wrap gap-2 mt-4">
-              {['India', 'UK', 'USA', 'UAE'].map((country) => (
-                <span key={country} className="px-3 py-1 rounded-full text-xs text-light-300/80 border border-dark-700/50">
-                  {country}
-                </span>
-              ))}
+              {countryChips.map((country) =>
+                country.href ? (
+                  <a
+                    key={country.name}
+                    href={country.href}
+                    className="px-3 py-1 rounded-full text-xs text-light-300/80 border border-dark-700/50 hover:text-light hover:border-accent-blue/30 transition-colors"
+                    data-cursor="pointer"
+                  >
+                    {country.name}
+                  </a>
+                ) : (
+                  <span key={country.name} className="px-3 py-1 rounded-full text-xs text-light-300/80 border border-dark-700/50">
+                    {country.name}
+                  </span>
+                )
+              )}
             </div>
           </div>
 

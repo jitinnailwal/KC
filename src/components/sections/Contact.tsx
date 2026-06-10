@@ -40,7 +40,14 @@ const contactInfo = [
   },
 ];
 
-const serviceAreas = ['Delhi', 'Varanasi', 'Bangalore', 'UK', 'USA', 'UAE'];
+const serviceAreas = [
+  { name: 'Delhi', href: '/locations/delhi' },
+  { name: 'Varanasi', href: '/locations/varanasi' },
+  { name: 'Bangalore', href: '/locations/bengaluru' },
+  { name: 'UK', href: '/locations/uk' },
+  { name: 'USA', href: '/locations/usa' },
+  { name: 'UAE', href: '/locations/uae' },
+];
 
 export default function Contact() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -161,12 +168,14 @@ export default function Contact() {
               <div className="text-xs text-light-300/70 uppercase tracking-wider mb-3">We Serve</div>
               <div className="flex flex-wrap gap-2">
                 {serviceAreas.map((area) => (
-                  <span
-                    key={area}
-                    className="px-4 py-2 rounded-full text-sm text-light-300/80 border border-dark-700/50"
+                  <a
+                    key={area.name}
+                    href={area.href}
+                    className="px-4 py-2 rounded-full text-sm text-light-300/80 border border-dark-700/50 hover:text-light hover:border-accent-blue/30 transition-colors"
+                    data-cursor="pointer"
                   >
-                    {area}
-                  </span>
+                    {area.name}
+                  </a>
                 ))}
               </div>
             </div>

@@ -34,6 +34,9 @@ const pages = [
   { slug: '/locations/delhi', pageLabel: 'Delhi Location' },
   { slug: '/locations/varanasi', pageLabel: 'Varanasi Location' },
   { slug: '/locations/bengaluru', pageLabel: 'Bengaluru Location' },
+  { slug: '/locations/uk', pageLabel: 'UK Location' },
+  { slug: '/locations/usa', pageLabel: 'USA Location' },
+  { slug: '/locations/uae', pageLabel: 'UAE Location' },
   { slug: '/work', pageLabel: 'Our Work' },
 ];
 
